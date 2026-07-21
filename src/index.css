@@ -525,10 +525,41 @@ p {
 }
 
 /* JTBD Opportunity Layout */
+.jtbd-card {
+  height: auto;
+}
+
+.jtbd-plotter-container {
+  height: 480px;
+}
+
+.jtbd-ranking-container {
+  height: auto;
+}
+
 .jtbd-grid {
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: 24px;
+}
+
+@media (min-width: 901px) {
+  .jtbd-card {
+    height: 720px;
+    display: flex;
+    flex-direction: column;
+  }
+  .jtbd-grid {
+    flex: 1;
+    min-height: 0;
+  }
+  .jtbd-plotter-container {
+    height: 580px;
+  }
+  .jtbd-ranking-container {
+    height: 580px;
+    justify-content: space-between;
+  }
 }
 
 @media (max-width: 900px) {

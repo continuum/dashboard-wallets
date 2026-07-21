@@ -677,7 +677,7 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
 
               {/* Sección A: Mapa de Oportunidad de Jobs to be Done (JTBD) */}
               {hasJtbdData ? (
-                <div className="card">
+                <div className="card jtbd-card">
                   <div className="card-header" style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '12px' }}>
                     <div>
                       <h2>Mapa de Oportunidades JTBD 2026</h2>
@@ -691,7 +691,7 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
                         Importancia vs Dificultad para las 10 metas financieras de los chilenos
                       </p>
                       
-                      <div style={{ width: '100%', height: '480px', position: 'relative' }}>
+                      <div className="jtbd-plotter-container" style={{ width: '100%', position: 'relative' }}>
                         {/* Indicadores en los extremos de los ejes */}
                         <div style={{ position: 'absolute', left: '35px', top: '15px', fontSize: '10px', fontWeight: 'bold', color: 'var(--text-tertiary)', zIndex: 10 }}>(-)</div>
                         <div style={{ position: 'absolute', left: '35px', bottom: '55px', fontSize: '10px', fontWeight: 'bold', color: 'var(--text-tertiary)', zIndex: 10 }}>(+)</div>
@@ -754,7 +754,7 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
                       <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: 0 }}>
                         Ranking de metas según dolor observado
                       </p>
-                      <div className="no-scrollbar" style={{ display: 'flex', flexDirection: 'column', gap: '6px', height: '480px', justifyContent: 'space-between' }}>
+                      <div className="no-scrollbar jtbd-ranking-container" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                         {data.jtbdOpportunityData.map((job) => {
                           const meta = JTBD_META[job.key] || { num: '?', color: 'var(--text-secondary)' };
                           return (
