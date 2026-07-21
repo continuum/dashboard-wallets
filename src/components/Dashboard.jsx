@@ -261,6 +261,12 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
     setExpandedQuestions(prev => ({ ...prev, [qId]: !prev[qId] }));
   };
 
+  const handleSurveyCardClick = (sourceName) => {
+    setSelectedSource(sourceName);
+    setActiveTab('breakdown');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const formatLastUpdated = (timestamp) => {
     if (!timestamp) return 'Nunca';
     const diffMs = Date.now() - timestamp;
@@ -499,7 +505,20 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
               {/* Stat Cards Grid - Dos columnas (Consolidado Grande Izq / Individuales Der) */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '16px', marginBottom: '8px' }}>
                 {/* Columna Izquierda: Consolidado */}
-                <div className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '24px 32px', position: 'relative', minHeight: '180px' }}>
+                <div 
+                  className="card interactive-card" 
+                  onClick={() => handleSurveyCardClick('consolidated')}
+                  style={{ 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    justifyContent: 'center', 
+                    padding: '24px 32px', 
+                    position: 'relative', 
+                    minHeight: '180px',
+                    cursor: 'pointer'
+                  }}
+                  title="Haz clic para ver el desglose detallado de todas las respuestas"
+                >
                   <span style={{ fontSize: '13px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.8px', fontWeight: 500 }}>
                     Respuestas Totales
                   </span>
@@ -520,7 +539,22 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
                       return `Respuestas ${name}`;
                     };
                     return (
-                      <div className="card" key={survey.name} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '12px 20px', minHeight: '52px', margin: 0, position: 'relative' }}>
+                      <div 
+                        className="card interactive-card" 
+                        key={survey.name} 
+                        onClick={() => handleSurveyCardClick(survey.name)}
+                        style={{ 
+                          display: 'flex', 
+                          flexDirection: 'column', 
+                          justifyContent: 'center', 
+                          padding: '12px 20px', 
+                          minHeight: '52px', 
+                          margin: 0, 
+                          position: 'relative',
+                          cursor: 'pointer'
+                        }}
+                        title={`Haz clic para ver el desglose detallado filtrado por ${survey.name}`}
+                      >
                         <span style={{ fontSize: '11px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 500 }}>
                           {getSurveyLabel(survey.name)}
                         </span>
