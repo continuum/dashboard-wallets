@@ -1,12 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-  ScatterChart, Scatter, ReferenceLine, ReferenceArea
+  ScatterChart, Scatter, ReferenceLine, ReferenceArea,
+  PieChart as RechartsPieChart, Pie, Cell, LabelList
 } from 'recharts';
 import { 
   Users, BarChart3, Database, Calendar, 
   Star, ChevronDown, ChevronUp, AlertCircle, Info, PieChart
 } from 'lucide-react';
+
+import logoMercadoPago from '../assets/mercado-pago.png';
+import logoAppleWallet from '../assets/apple-wallet.png';
+import logoCopec from '../assets/copec.png';
+import logoGoogleWallet from '../assets/google-wallet.png';
+import logoMiBanco from '../assets/mi-banco.png';
 
 const COLORS_LIGHT = ['#1a73e8', '#12b5cb', '#ab47bc', '#34a853', '#fbbc05', '#e91e63', '#ff5722', '#607d8b'];
 const COLORS_DARK = ['#8ab4f8', '#78d9ec', '#c58af9', '#81c995', '#fdd663', '#f48fb1', '#ffab91', '#b0bec5'];
@@ -114,123 +121,110 @@ const CustomJTBDTooltip = ({ active, payload }) => {
   return null;
 };
 
-function WalletBrandBadge({ name }) {
-  const lower = name.toLowerCase().trim();
-  
-  const badgeStyle = {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '6px',
-    height: '20px',
-    padding: '1px 8px',
-    borderRadius: '10px',
-    fontSize: '11px',
-    fontWeight: 500,
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    maxWidth: '180px'
+
+// Componente premium para renderizar el gráfico de barras verticales de Billeteras Preferidas con Logos
+function PreferredWalletsCard({ dataObj, total }) {
+  if (!dataObj) return null;
+
+  // Definir las 5 billeteras clave y sus logos correspondientes
+  const wallets = [
+    { name: 'Mercado Pago', apiKey: 'Mercado Pago', logo: logoMercadoPago },
+    { name: 'Apple Pay', apiKey: 'Apple Pay', logo: logoAppleWallet },
+    { name: 'Copec Pay', apiKey: 'Copec Pay', logo: logoCopec },
+    { name: 'Google Pay', apiKey: 'Google Pay', logo: logoGoogleWallet },
+    { name: 'Mi Banco', apiKey: 'La aplicación de mi banco', logo: logoMiBanco }
+  ];
+
+  // Mapear los conteos y porcentajes desde el objeto de datos
+  const items = wallets.map(w => {
+    const count = dataObj[w.apiKey] || 0;
+    const percentage = total > 0 ? parseFloat(((count / total) * 100).toFixed(1)) : 0;
+    return {
+      ...w,
+      count,
+      percentage
+    };
+  }).sort((a, b) => b.count - a.count); // Ordenar por frecuencia
+
+  const renderCustomXAxisTick = (props) => {
+    const { x, y, payload } = props;
+    const item = items.find(i => i.name === payload.value);
+    if (item && item.logo) {
+      return (
+        <g transform={`translate(${x - 14},${y})`}>
+          <defs>
+            <clipPath id={`clip-${payload.value.replace(/\s+/g, '-')}`}>
+              <rect width="28" height="28" rx="6" />
+            </clipPath>
+          </defs>
+          <image 
+            href={item.logo} 
+            x={0} 
+            y={6} 
+            height="28" 
+            width="28" 
+            clipPath={`url(#clip-${payload.value.replace(/\s+/g, '-')})`}
+            style={{ borderRadius: '6px' }}
+          />
+        </g>
+      );
+    }
+    return (
+      <text x={x} y={y + 14} fill="var(--text-secondary)" textAnchor="middle" fontSize={10}>
+        {payload.value}
+      </text>
+    );
   };
 
-  if (lower.includes('mercado') && lower.includes('pago')) {
-    return (
-      <div style={{ ...badgeStyle, backgroundColor: '#009ee3', color: '#ffffff', fontWeight: 600 }}>
-        Mercado Pago
-      </div>
-    );
-  }
-  if (lower.includes('apple') && lower.includes('pay')) {
-    return (
-      <div style={{ ...badgeStyle, backgroundColor: '#1d1d1f', color: '#ffffff', fontWeight: 600 }}>
-         Apple Pay
-      </div>
-    );
-  }
-  if (lower.includes('google') && lower.includes('pay')) {
-    return (
-      <div style={{ ...badgeStyle, backgroundColor: '#f1f3f4', border: '1px solid #dadce0', color: '#202124', fontWeight: 600 }}>
-        <span style={{ color: '#4285F4' }}>G</span>
-        <span style={{ color: '#EA4335' }}>o</span>
-        <span style={{ color: '#FBBC05' }}>o</span>
-        <span style={{ color: '#4285F4' }}>g</span>
-        <span style={{ color: '#34A853' }}>l</span>
-        <span style={{ color: '#EA4335' }}>e</span> Pay
-      </div>
-    );
-  }
-  if (lower === 'mach') {
-    return (
-      <div style={{ ...badgeStyle, backgroundColor: '#2f124d', color: '#39ff14', fontWeight: 700, letterSpacing: '0.5px' }}>
-        MACH
-      </div>
-    );
-  }
-  if (lower === 'tenpo') {
-    return (
-      <div style={{ ...badgeStyle, backgroundColor: '#5c10a4', color: '#ffffff', fontWeight: 600 }}>
-        Tenpo
-      </div>
-    );
-  }
-  if (lower.includes('copec')) {
-    return (
-      <div style={{ ...badgeStyle, backgroundColor: '#002f6c', color: '#ffffff', fontWeight: 600 }}>
-        Copec Pay
-      </div>
-    );
-  }
-  if (lower.includes('mi banco') || lower.includes('aplicación') || lower.includes('aplicacion')) {
-    return (
-      <div style={{ ...badgeStyle, backgroundColor: '#e8f0fe', border: '1px solid #1a73e8', color: '#1a73e8', fontWeight: 500 }}>
-        🏦 Mi Banco
-      </div>
-    );
-  }
-  if (lower.includes('bancoestado') || lower.includes('banco estado')) {
-    return (
-      <div style={{ ...badgeStyle, backgroundColor: '#ff5b00', color: '#ffffff', fontWeight: 600 }}>
-        BancoEstado
-      </div>
-    );
-  }
-  if (lower.includes('cencopay')) {
-    return (
-      <div style={{ ...badgeStyle, backgroundColor: '#0072ce', color: '#ffffff', fontWeight: 600 }}>
-        CencoPay
-      </div>
-    );
-  }
-  if (lower.includes('global') && lower.includes('66')) {
-    return (
-      <div style={{ ...badgeStyle, backgroundColor: '#0c1630', color: '#ffd700', fontWeight: 600 }}>
-        Global 66
-      </div>
-    );
-  }
-  if (lower === 'tapp') {
-    return (
-      <div style={{ ...badgeStyle, backgroundColor: '#00bfff', color: '#ffffff', fontWeight: 600 }}>
-        Tapp
-      </div>
-    );
-  }
-  if (lower === 'revolut') {
-    return (
-      <div style={{ ...badgeStyle, backgroundColor: '#000000', color: '#ffffff', fontWeight: 600 }}>
-        Revolut
-      </div>
-    );
-  }
-
   return (
-    <span style={{ color: 'var(--text-primary)', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '75%' }}>
-      {name}
-    </span>
+    <div className="card" style={{ padding: '16px', display: 'flex', flexDirection: 'column' }}>
+      <h3 style={{ fontSize: '14px', fontWeight: 700, marginBottom: '12px', color: 'var(--text-primary)', borderBottom: '1px solid var(--border-color)', paddingBottom: '6px' }}>
+        Billeteras Preferidas
+      </h3>
+      <div style={{ flex: 1, minHeight: '180px', width: '100%', marginTop: '10px' }}>
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={items} margin={{ top: 20, right: 10, bottom: 35, left: 10 }}>
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-color)" opacity={0.3} />
+            <XAxis 
+              dataKey="name" 
+              tick={renderCustomXAxisTick} 
+              axisLine={false}
+              tickLine={false}
+            />
+            <YAxis hide domain={[0, 'dataMax + 10']} />
+            <Tooltip 
+              formatter={(value, name, props) => [`${value}% (${props.payload.count})`, 'Preferencia']}
+              contentStyle={{
+                backgroundColor: 'var(--card-bg)',
+                border: '1px solid var(--border-color)',
+                borderRadius: '8px',
+                color: 'var(--text-primary)',
+                fontSize: '11px',
+                fontFamily: 'var(--font-family)'
+              }}
+            />
+            <Bar 
+              dataKey="percentage" 
+              fill="var(--accent-color)" 
+              radius={[6, 6, 0, 0]}
+              maxBarSize={36}
+            >
+              <LabelList 
+                dataKey="percentage" 
+                position="top" 
+                formatter={(v) => `${v}%`}
+                style={{ fill: 'var(--text-primary)', fontSize: 10, fontWeight: '700' }} 
+              />
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
   );
 }
 
-// Componente auxiliar para renderizar barras de progreso horizontales minimalistas
-function DemographicsBarList({ title, dataObj, total, limit = null, isWalletList = false }) {
+// Componente premium para renderizar gráficos de torta (PieChart) para perfiles demográficos
+function DemographicsPieChart({ title, dataObj, total, limit = null }) {
   if (!dataObj || Object.keys(dataObj).length === 0) {
     return (
       <div className="card" style={{ padding: '16px' }}>
@@ -241,40 +235,107 @@ function DemographicsBarList({ title, dataObj, total, limit = null, isWalletList
   }
 
   // Ordenar de mayor a menor frecuencia
-  let items = Object.keys(dataObj)
+  let rawItems = Object.keys(dataObj)
     .map(name => ({ name, count: dataObj[name] }))
     .sort((a, b) => b.count - a.count);
 
   if (limit) {
-    items = items.slice(0, limit);
+    rawItems = rawItems.slice(0, limit);
   }
 
+  // Si hay más de 4 elementos, agrupar el resto como "Otros" para mantener el Pie limpio
+  let items = [];
+  if (rawItems.length > 4) {
+    items = rawItems.slice(0, 3);
+    const otherCount = rawItems.slice(3).reduce((acc, curr) => acc + curr.count, 0);
+    if (otherCount > 0) {
+      items.push({ name: 'Otros', count: otherCount });
+    }
+  } else {
+    items = rawItems;
+  }
+
+  const chartData = items.map(item => ({
+    name: item.name,
+    value: item.count,
+    percentage: total > 0 ? parseFloat(((item.count / total) * 100).toFixed(1)) : 0
+  }));
+
+  // Paleta de colores premium y diferenciados (Tailwind colors)
+  // Azul, Violeta, Esmeralda, Rosa/Naranja
+  const PIE_COLORS = [
+    '#3b82f6', // Blue
+    '#8b5cf6', // Violet
+    '#10b981', // Emerald
+    '#f43f5e', // Rose
+    '#f59e0b'  // Amber
+  ];
+
   return (
-    <div className="card" style={{ padding: '16px' }}>
-      <h3 style={{ fontSize: '14px', fontWeight: 700, marginBottom: '12px', color: 'var(--text-primary)', borderBottom: '1px solid var(--border-color)', paddingBottom: '6px' }}>{title}</h3>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-        {items.map(item => {
-          const pct = total > 0 ? ((item.count / total) * 100).toFixed(1) : 0;
-          return (
-            <div key={item.name} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', height: '24px' }}>
-                {isWalletList ? (
-                  <WalletBrandBadge name={item.name} />
-                ) : (
-                  <span style={{ color: 'var(--text-primary)', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '75%' }}>{item.name}</span>
-                )}
-                <span style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>{pct}% <span style={{ fontSize: '10px', color: 'var(--text-tertiary)' }}>({item.count})</span></span>
-              </div>
-              <div style={{ width: '100%', height: '6px', backgroundColor: 'var(--bg-tertiary)', borderRadius: '3px', overflow: 'hidden' }}>
-                <div style={{ width: `${pct}%`, height: '100%', backgroundColor: 'var(--accent-color)', borderRadius: '3px' }} />
-              </div>
+    <div className="card" style={{ padding: '16px', display: 'flex', flexDirection: 'column' }}>
+      <h3 style={{ fontSize: '14px', fontWeight: 700, marginBottom: '12px', color: 'var(--text-primary)', borderBottom: '1px solid var(--border-color)', paddingBottom: '6px' }}>
+        {title}
+      </h3>
+      <div style={{ display: 'flex', flex: 1, alignItems: 'center', justifyContent: 'center', minHeight: '180px', position: 'relative' }}>
+        <div style={{ width: '130px', height: '130px' }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <RechartsPieChart>
+              <Pie
+                data={chartData}
+                cx="50%"
+                cy="50%"
+                innerRadius={36}
+                outerRadius={55}
+                paddingAngle={3}
+                dataKey="value"
+              >
+                {chartData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip 
+                formatter={(value, name, props) => [`${props.payload.percentage}% (${value})`, name]}
+                contentStyle={{
+                  backgroundColor: 'var(--card-bg)',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: '8px',
+                  color: 'var(--text-primary)',
+                  fontSize: '11px',
+                  fontFamily: 'var(--font-family)'
+                }}
+              />
+            </RechartsPieChart>
+          </ResponsiveContainer>
+        </div>
+        
+        {/* Leyendas compactas a la derecha */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginLeft: '12px', flex: 1, minWidth: 0 }}>
+          {chartData.map((entry, index) => (
+            <div key={entry.name} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', minWidth: 0 }}>
+              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: PIE_COLORS[index % PIE_COLORS.length], flexShrink: 0 }} />
+              <span 
+                style={{ 
+                  color: 'var(--text-primary)', 
+                  whiteSpace: 'nowrap', 
+                  textOverflow: 'ellipsis', 
+                  overflow: 'hidden', 
+                  flex: 1 
+                }}
+                title={entry.name}
+              >
+                {entry.name}
+              </span>
+              <span style={{ color: 'var(--text-secondary)', fontWeight: 600, flexShrink: 0 }}>
+                {entry.percentage}%
+              </span>
             </div>
-          );
-        })}
+          ))}
+        </div>
       </div>
     </div>
   );
 }
+
 
 function SurveyBrandBadge({ name }) {
   const lower = name.toLowerCase();
@@ -830,29 +891,26 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
                 </h2>
                 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px' }}>
-                  <DemographicsBarList 
-                    title="Billeteras Preferidas" 
+                  <PreferredWalletsCard 
                     dataObj={data.demographics.wallets} 
                     total={data.totalResponses} 
-                    limit={5}
-                    isWalletList={true}
                   />
                   
-                  <DemographicsBarList 
+                  <DemographicsPieChart 
                     title="Género" 
                     dataObj={data.demographics.gender} 
                     total={data.totalResponses} 
                     limit={5}
                   />
 
-                  <DemographicsBarList 
+                  <DemographicsPieChart 
                     title="Situación Laboral" 
                     dataObj={data.demographics.employment} 
                     total={data.totalResponses} 
                     limit={5}
                   />
 
-                  <DemographicsBarList 
+                  <DemographicsPieChart 
                     title="Gestión de Finanzas" 
                     dataObj={data.demographics.budget} 
                     total={data.totalResponses} 
