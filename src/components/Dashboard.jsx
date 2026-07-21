@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-  ScatterChart, Scatter, ReferenceLine, Cell, LabelList
+  ScatterChart, Scatter, ReferenceLine
 } from 'recharts';
 import { 
   Users, BarChart3, Database, Calendar, 
@@ -22,6 +22,96 @@ const JTBD_DETAILS = {
   'Acceso para terceros': 'Proveer a un tercero (como hijos) un método de pago seguro y controlado sin requisitos bancarios complejos.',
   'Servicios cotidianos': 'Acceder a servicios diarios de transporte y alimentación simplificados, sin tener que manejar múltiples aplicaciones.',
   'Diversidad de pagos': 'Contar con métodos de pago alternativos (pagar directo de la cuenta, cuotas sin tarjeta de crédito, etc.).'
+};
+
+const JTBD_META = {
+  universalidad: { num: 1, color: '#3b82f6' }, // Blue
+  seguridad: { num: 2, color: '#ef4444' },     // Red
+  control: { num: 3, color: '#f59e0b' },       // Amber
+  retribucion: { num: 4, color: '#ec4899' },    // Pink
+  trazabilidad: { num: 5, color: '#8b5cf6' },   // Purple
+  rentabilidad: { num: 6, color: '#10b981' },   // Green
+  presupuesto: { num: 7, color: '#06b6d4' },    // Cyan
+  terceros: { num: 8, color: '#f97316' },       // Orange
+  servicios_cotidianos: { num: 9, color: '#a855f7' }, // Light Purple
+  diversidad: { num: 10, color: '#14b8a6' }     // Teal
+};
+
+const CustomScatterPoint = (props) => {
+  const { cx, cy, payload } = props;
+  if (!cx || !cy || !payload) return null;
+  
+  const meta = JTBD_META[payload.key] || { num: '?', color: 'var(--accent-color)' };
+  const r = 13; // Radio 13px (diámetro 26px) es perfecto y muy claro.
+  
+  return (
+    <g style={{ cursor: 'pointer' }}>
+      {/* Sombra de relieve */}
+      <circle 
+        cx={cx} 
+        cy={cy} 
+        r={r} 
+        fill="none" 
+        stroke="rgba(0,0,0,0.15)" 
+        strokeWidth={3} 
+      />
+      {/* Círculo relleno de color del Job */}
+      <circle 
+        cx={cx} 
+        cy={cy} 
+        r={r} 
+        fill={meta.color} 
+        stroke="#ffffff" 
+        strokeWidth={2}
+      />
+      {/* Número en el centro del círculo */}
+      <text
+        x={cx}
+        y={cy}
+        dy=".35em"
+        textAnchor="middle"
+        fill="#ffffff"
+        style={{ fontSize: '10px', fontWeight: '800', fontFamily: 'var(--font-family)', userSelect: 'none' }}
+      >
+        {meta.num}
+      </text>
+    </g>
+  );
+};
+
+const CustomJTBDTooltip = ({ active, payload }) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    const meta = JTBD_META[data.key] || { num: '?', color: 'var(--accent-color)' };
+    return (
+      <div className="card" style={{ padding: '12px 14px', margin: 0, fontSize: '12px', border: '1px solid var(--border-color)', backgroundColor: 'var(--card-bg)', backdropFilter: 'blur(12px)', boxShadow: 'var(--shadow-md)', maxWidth: '240px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+          <div style={{ 
+            width: '18px', 
+            height: '18px', 
+            borderRadius: '50%', 
+            backgroundColor: meta.color, 
+            color: '#ffffff', 
+            fontSize: '10px', 
+            fontWeight: 'bold', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center',
+            flexShrink: 0
+          }}>
+            {meta.num}
+          </div>
+          <strong style={{ color: 'var(--text-primary)', whiteSpace: 'normal', lineHeight: '1.2' }}>{data.name}</strong>
+        </div>
+        <div style={{ color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '11px', marginTop: '4px' }}>
+          <span>Importancia: <strong>{data.importance}</strong></span>
+          <span>Dificultad: <strong>{data.difficulty}</strong></span>
+          <span>Oportunidad: <strong style={{ color: 'var(--accent-color)', fontWeight: 700 }}>{data.opportunity}</strong></span>
+        </div>
+      </div>
+    );
+  }
+  return null;
 };
 
 function WalletBrandBadge({ name }) {
@@ -619,18 +709,13 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
                             <ReferenceLine x={7.5} stroke="var(--border-color)" strokeDasharray="3 3" />
                             <ReferenceLine y={5} stroke="var(--border-color)" strokeDasharray="3 3" />
                             
-                            <Tooltip 
-                              cursor={{ strokeDasharray: '3 3' }} 
-                              contentStyle={tooltipStyle}
-                              formatter={(value, name) => [value, name]}
-                            />
+                            <Tooltip content={<CustomJTBDTooltip />} />
                             
-                            <Scatter name="Metas Financieras" data={data.jtbdOpportunityData} fill="var(--accent-color)">
-                              {data.jtbdOpportunityData.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
-                              ))}
-                              <LabelList dataKey="name" position="top" style={{ fontSize: 9, fill: 'var(--text-primary)', fontWeight: 400 }} />
-                            </Scatter>
+                            <Scatter 
+                              name="Metas Financieras" 
+                              data={data.jtbdOpportunityData} 
+                              shape={<CustomScatterPoint />}
+                            />
                           </ScatterChart>
                         </ResponsiveContainer>
                       </div>
@@ -647,25 +732,48 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
                         Ranking de metas según dolor observado
                       </p>
                       <div className="no-scrollbar" style={{ display: 'flex', flexDirection: 'column', gap: '8px', overflowY: 'auto', maxHeight: '380px' }}>
-                        {data.jtbdOpportunityData.map((job, idx) => (
-                          <div 
-                            key={job.key} 
-                            title={JTBD_DETAILS[job.name.trim()] || ''}
-                            style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 8px', borderRadius: 'var(--radius-sm)', backgroundColor: idx < 3 ? 'var(--accent-light)' : 'var(--bg-secondary)', border: '1px solid var(--border-color)', cursor: 'help' }}
-                          >
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', maxWidth: '75%' }}>
-                              <span style={{ fontSize: '12px', fontWeight: idx < 3 ? 500 : 400, color: 'var(--text-primary)', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
-                                {idx + 1}. {job.name}
-                              </span>
-                              <span style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>
-                                Imp: {job.importance} | Dif: {job.difficulty}
+                        {data.jtbdOpportunityData.map((job, idx) => {
+                          const meta = JTBD_META[job.key] || { num: '?', color: 'var(--text-secondary)' };
+                          return (
+                            <div 
+                              key={job.key} 
+                              title={JTBD_DETAILS[job.name.trim()] || ''}
+                              style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 8px', borderRadius: 'var(--radius-sm)', backgroundColor: idx < 3 ? 'var(--accent-light)' : 'var(--bg-secondary)', border: '1px solid var(--border-color)', cursor: 'help' }}
+                            >
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', maxWidth: '80%', minWidth: 0 }}>
+                                <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)', minWidth: '22px' }}>
+                                  {idx + 1}°
+                                </span>
+                                <div style={{ 
+                                  width: '18px', 
+                                  height: '18px', 
+                                  borderRadius: '50%', 
+                                  backgroundColor: meta.color, 
+                                  color: '#ffffff', 
+                                  fontSize: '10px', 
+                                  fontWeight: 'bold', 
+                                  display: 'flex', 
+                                  alignItems: 'center', 
+                                  justifyContent: 'center',
+                                  flexShrink: 0
+                                }}>
+                                  {meta.num}
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', minWidth: 0 }}>
+                                  <span style={{ fontSize: '12px', fontWeight: idx < 3 ? 600 : 500, color: 'var(--text-primary)', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+                                    {job.name}
+                                  </span>
+                                  <span style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>
+                                    Imp: {job.importance} | Dif: {job.difficulty}
+                                  </span>
+                                </div>
+                              </div>
+                              <span style={{ fontSize: '12px', fontWeight: 600, color: idx < 3 ? 'var(--accent-color)' : 'var(--text-secondary)', marginLeft: '8px' }}>
+                                {job.opportunity}
                               </span>
                             </div>
-                            <span style={{ fontSize: '12px', fontWeight: 600, color: idx < 3 ? 'var(--accent-color)' : 'var(--text-secondary)' }}>
-                              {job.opportunity}
-                            </span>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </div>
                   </div>
