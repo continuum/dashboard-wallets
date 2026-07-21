@@ -52,7 +52,7 @@ function normalizeQuestionText(text) {
   return text
     .toLowerCase()
     .trim()
-    .replace(/^[¿\s]+|[?\s]+$/g, '') // Elimina signos de interrogación al inicio/fin
+    .replace(/^[¿\s'"“‘+-]+|[?\s!'"”’.:]+$/g, '') // Elimina signos comunes al inicio y fin (¿, ?, !, ., :, comillas, etc)
     .replace(/\s+/g, ' '); // Colapsa múltiples espacios
 }
 

@@ -50,7 +50,7 @@ export async function fetchSheetData(urlOrId) {
     throw new Error('La URL o ID de Google Sheets proporcionado no es válido.');
   }
 
-  const endpointUrl = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:json`;
+  const endpointUrl = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:json&headers=1`;
 
   try {
     const response = await fetch(endpointUrl);
