@@ -52,7 +52,7 @@
   --text-primary: #e8eaed;
   --text-secondary: #9aa0a6;
   --text-tertiary: #70757a;
-  --border-color: rgba(255, 255, 255, 0.12);
+  --border-color: rgba(255, 255, 255, 0.25);
   --border-focus: #3b6ef6;
   --accent-color: #3b6ef6;
   --accent-hover: #5885ff;
@@ -80,7 +80,7 @@
     --text-primary: #e8eaed;
     --text-secondary: #9aa0a6;
     --text-tertiary: #70757a;
-    --border-color: rgba(255, 255, 255, 0.12);
+    --border-color: rgba(255, 255, 255, 0.25);
     --border-focus: #3b6ef6;
     --accent-color: #3b6ef6;
     --accent-hover: #5885ff;

@@ -405,8 +405,10 @@ export function aggregateSurveyData(surveys) {
       avgImp = parseFloat(avgImp.toFixed(2));
       avgDif = parseFloat(avgDif.toFixed(2));
 
-      // Puntuación de Oportunidad combinada
-      const opportunityScore = parseFloat(((avgImp + avgDif) / 2).toFixed(2));
+      // Puntuación de Oportunidad combinada: Importancia + max(Importancia - Satisfaccion, 0)
+      // donde Satisfaccion = 10 - Dificultad
+      const satisfaction = parseFloat((10 - avgDif).toFixed(2));
+      const opportunityScore = parseFloat((avgImp + Math.max(avgImp - satisfaction, 0)).toFixed(2));
 
       result.jtbdOpportunityData.push({
         key: job.key,

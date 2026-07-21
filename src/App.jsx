@@ -360,6 +360,7 @@ export default function App() {
                   lastUpdated={lastUpdated}
                   onForceRefresh={() => triggerRefresh(config, false)}
                   isRefreshing={isRefreshing}
+                  theme={theme}
                 />
               ) : (
                 <div className="card" style={{ maxWidth: '540px', margin: '40px auto', width: '100%', textAlign: 'center', padding: '32px 24px', display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center' }}>

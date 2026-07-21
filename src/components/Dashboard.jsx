@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-  ScatterChart, Scatter, ReferenceLine
+  ScatterChart, Scatter, ReferenceLine, ReferenceArea
 } from 'recharts';
 import { 
   Users, BarChart3, Database, Calendar, 
@@ -319,24 +319,27 @@ function SurveyBrandBadge({ name }) {
   );
 }
 
-export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefreshing }) {
+export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefreshing, theme = 'system' }) {
   const [activeTab, setActiveTab] = useState('summary'); // 'summary', 'breakdown'
   const [selectedSource, setSelectedSource] = useState('consolidated');
   const [expandedQuestions, setExpandedQuestions] = useState({});
-  const [isDark, setIsDark] = useState(
+  
+  // Determinar si el modo oscuro está activo basado en el prop theme y la preferencia del sistema
+  const [systemDark, setSystemDark] = useState(
     window.matchMedia('(prefers-color-scheme: dark)').matches
   );
 
-  // Monitorizar cambios en el esquema de color del sistema
   useEffect(() => {
     const media = window.matchMedia('(prefers-color-scheme: dark)');
-    const listener = (e) => setIsDark(e.matches);
+    const listener = (e) => setSystemDark(e.matches);
     media.addEventListener('change', listener);
     return () => media.removeEventListener('change', listener);
   }, []);
 
+  const isDark = theme === 'dark' || (theme === 'system' && systemDark);
+
   const colors = isDark ? COLORS_DARK : COLORS_LIGHT;
-  const gridColor = isDark ? '#2d2d2d' : '#f1f3f4';
+  const gridColor = isDark ? 'rgba(255, 255, 255, 0.25)' : '#dadce0';
   const tooltipStyle = {
     backgroundColor: isDark ? '#2d2d2d' : '#ffffff',
     border: `1px solid ${isDark ? '#3c4043' : '#dadce0'}`,
@@ -373,6 +376,12 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
 
   const hasResponses = data.totalResponses > 0;
   const hasJtbdData = data.jtbdOpportunityData && data.jtbdOpportunityData.length > 0;
+
+  // Mapear los datos JTBD agregando la coordenada Y invertida (10 - difficulty) para el gráfico
+  const jtbdChartData = (data.jtbdOpportunityData || []).map(job => ({
+    ...job,
+    opportunityY: parseFloat((10 - job.difficulty).toFixed(2))
+  }));
 
   // Filtrar preguntas para la pestaña de desglose
   const filteredQuestions = data.aggregatedQuestions.filter(q => {
@@ -682,10 +691,23 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
                         Importancia vs Dificultad para las 10 metas financieras de los chilenos
                       </p>
                       
-                      <div style={{ width: '100%', height: '360px' }}>
+                      <div style={{ width: '100%', height: '480px', position: 'relative' }}>
+                        {/* Indicadores en los extremos de los ejes */}
+                        <div style={{ position: 'absolute', left: '35px', top: '15px', fontSize: '10px', fontWeight: 'bold', color: 'var(--text-tertiary)', zIndex: 10 }}>(-)</div>
+                        <div style={{ position: 'absolute', left: '35px', bottom: '55px', fontSize: '10px', fontWeight: 'bold', color: 'var(--text-tertiary)', zIndex: 10 }}>(+)</div>
+                        <div style={{ position: 'absolute', left: '55px', bottom: '25px', fontSize: '10px', fontWeight: 'bold', color: 'var(--text-tertiary)', zIndex: 10 }}>(-)</div>
+                        <div style={{ position: 'absolute', right: '35px', bottom: '25px', fontSize: '10px', fontWeight: 'bold', color: 'var(--text-tertiary)', zIndex: 10 }}>(+)</div>
+
                         <ResponsiveContainer width="100%" height="100%">
-                          <ScatterChart margin={{ top: 20, right: 30, bottom: 20, left: -20 }}>
+                          <ScatterChart margin={{ top: 20, right: 30, bottom: 30, left: 0 }}>
                             <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+                            
+                            {/* Cuadrantes de fondo */}
+                            <ReferenceArea x1={0} x2={5} y1={0} y2={5} fill="rgba(16, 185, 129, 0.05)" stroke="none" label={{ value: 'Standby', position: 'insideTopLeft', offset: 12, fill: 'var(--text-secondary)', fontSize: 11, fontWeight: 600, opacity: 0.8 }} />
+                            <ReferenceArea x1={5} x2={10} y1={0} y2={5} fill="rgba(139, 92, 246, 0.05)" stroke="none" label={{ value: 'Espacio de crecimiento', position: 'insideTopRight', offset: 12, fill: 'var(--text-secondary)', fontSize: 11, fontWeight: 600, opacity: 0.8 }} />
+                            <ReferenceArea x1={0} x2={5} y1={5} y2={10} fill="rgba(236, 72, 153, 0.05)" stroke="none" label={{ value: 'Mínima apuesta', position: 'insideBottomLeft', offset: 12, fill: 'var(--text-secondary)', fontSize: 11, fontWeight: 600, opacity: 0.8 }} />
+                            <ReferenceArea x1={5} x2={10} y1={5} y2={10} fill="rgba(59, 130, 246, 0.05)" stroke="none" label={{ value: 'Foco de mercado', position: 'insideBottomRight', offset: 12, fill: 'var(--text-secondary)', fontSize: 11, fontWeight: 600, opacity: 0.8 }} />
+                            
                             <XAxis 
                               type="number" 
                               dataKey="importance" 
@@ -693,27 +715,28 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
                               domain={[0, 10]} 
                               stroke="var(--text-secondary)"
                               tick={{ fontSize: 10 }}
-                              label={{ value: 'Importancia del Job para el usuario (→)', position: 'bottom', offset: 0, style: { fontSize: 11, fill: 'var(--text-secondary)' } }}
+                              label={{ value: 'JTBD Score (Demanda - Importancia - Dificultad para lograrlo)', position: 'bottom', offset: 0, style: { fontSize: 11, fill: 'var(--text-secondary)', fontWeight: 500 } }}
                             />
                             <YAxis 
                               type="number" 
-                              dataKey="difficulty" 
-                              name="Dificultad" 
+                              dataKey="opportunityY" 
+                              name="Cobertura de la Oferta" 
                               domain={[0, 10]} 
+                              reversed={true}
                               stroke="var(--text-secondary)"
                               tick={{ fontSize: 10 }}
-                              label={{ value: 'Dificultad para lograr el Job (↑)', angle: -90, position: 'insideLeft', offset: -10, style: { fontSize: 11, fill: 'var(--text-secondary)', textAnchor: 'middle' } }}
+                              label={{ value: 'Cobertura del mercado (oferta)', angle: -90, position: 'insideLeft', offset: -10, style: { fontSize: 11, fill: 'var(--text-secondary)', textAnchor: 'middle', fontWeight: 500 } }}
                             />
                             
-                            {/* Líneas de cuadrantes (Cortan en X=7.5 y Y=5) */}
-                            <ReferenceLine x={7.5} stroke="var(--border-color)" strokeDasharray="3 3" />
-                            <ReferenceLine y={5} stroke="var(--border-color)" strokeDasharray="3 3" />
+                            {/* Líneas de cuadrantes (Cortan en X=5 y Y=5) */}
+                            <ReferenceLine x={5} stroke="var(--border-color)" strokeDasharray="4 4" strokeWidth={1.5} />
+                            <ReferenceLine y={5} stroke="var(--border-color)" strokeDasharray="4 4" strokeWidth={1.5} />
                             
                             <Tooltip content={<CustomJTBDTooltip />} />
                             
                             <Scatter 
                               name="Metas Financieras" 
-                              data={data.jtbdOpportunityData} 
+                              data={jtbdChartData} 
                               shape={<CustomScatterPoint />}
                             />
                           </ScatterChart>
@@ -721,8 +744,8 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
                       </div>
                       
                       <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: '8px', fontSize: '10px', color: 'var(--text-tertiary)', borderTop: '1px solid var(--border-color)', paddingTop: '10px' }}>
-                        <span>Sup-Derecha: Oportunidades Clave (Alta Importancia / Alta Dificultad)</span>
-                        <span>Inf-Derecha: Básicos (Alta Importancia / Baja Dificultad)</span>
+                        <span>Arriba: Mayor Dificultad / Menor Cobertura de Oferta (-)</span>
+                        <span>Abajo: Menor Dificultad / Mayor Cobertura de Oferta (+)</span>
                       </div>
                     </div>
 
@@ -731,7 +754,7 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
                       <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: 0 }}>
                         Ranking de metas según dolor observado
                       </p>
-                      <div className="no-scrollbar" style={{ display: 'flex', flexDirection: 'column', gap: '8px', overflowY: 'auto', maxHeight: '380px' }}>
+                      <div className="no-scrollbar" style={{ display: 'flex', flexDirection: 'column', gap: '6px', height: '480px', justifyContent: 'space-between' }}>
                         {data.jtbdOpportunityData.map((job) => {
                           const meta = JTBD_META[job.key] || { num: '?', color: 'var(--text-secondary)' };
                           return (
@@ -747,7 +770,8 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
                                 backgroundColor: meta.color, 
                                 border: '1px solid rgba(255, 255, 255, 0.15)', 
                                 boxShadow: '0 2px 6px rgba(0, 0, 0, 0.08)',
-                                cursor: 'help'
+                                cursor: 'help',
+                                flex: 1
                               }}
                             >
                               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', maxWidth: '85%', minWidth: 0 }}>
