@@ -25,6 +25,59 @@ function parseLikertValue(val) {
 }
 
 /**
+ * Sanitiza y unifica los nombres de las billeteras digitales y aplicaciones bancarias.
+ */
+function cleanWalletName(val) {
+  if (!val) return '';
+  // 1. Quitar emojis y símbolos iniciales (incluyendo los bytes de caracteres de reemplazo)
+  let name = val.replace(/^[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ🏦]+/, '').trim();
+  
+  // 2. Normalizar nombres de billeteras
+  const lower = name.toLowerCase();
+  if (lower.includes('mercado') && lower.includes('pago')) {
+    return 'Mercado Pago';
+  }
+  if (lower === 'mercadopago') {
+    return 'Mercado Pago';
+  }
+  if (lower.includes('apple') && lower.includes('pay')) {
+    return 'Apple Pay';
+  }
+  if (lower.includes('google') && lower.includes('pay')) {
+    return 'Google Pay';
+  }
+  if (lower === 'mach' || lower === 'machbank') {
+    return 'MACH';
+  }
+  if (lower === 'tenpo') {
+    return 'Tenpo';
+  }
+  if (lower === 'onepay' || lower === 'one pay') {
+    return 'OnePay';
+  }
+  if (lower.includes('copec')) {
+    return 'Copec Pay';
+  }
+  if (lower.includes('mi banco') || lower.includes('aplicación de mi banco') || lower.includes('aplicacion de mi banco')) {
+    return 'La aplicación de mi banco';
+  }
+  if (lower.includes('rutpay') || lower.includes('cuenta rut') || lower.includes('banco estado') || lower.includes('bancoestado')) {
+    return 'BancoEstado';
+  }
+  if (lower.includes('cencopay') || lower.includes('cenco pay')) {
+    return 'CencoPay';
+  }
+  if (lower.includes('global') && lower.includes('66')) {
+    return 'Global 66';
+  }
+  if (lower.includes('tapp')) {
+    return 'Tapp';
+  }
+  
+  return name;
+}
+
+/**
  * Normaliza los nombres de las preguntas para agruparlas.
  */
 function normalizeQuestionText(text) {
@@ -208,13 +261,13 @@ export function aggregateSurveyData(surveys) {
           // 4. Billeteras digitales preferidas
           else if (lowerQ.includes('aplicaciones') || lowerQ.includes('billetera') || lowerQ.includes('utiliza frecuentemente') || lowerQ.includes('cuál de estas') || lowerQ.includes('aplicaciones financieras')) {
             // Limpiar emojis o caracteres de lista y separar si es de opción múltiple
-            const splitVals = String(val).split(/[,;]/);
-            splitVals.forEach(v => {
-              const cleanVal = v.replace(/^[👛\s•*\-]+/, '').trim();
-              if (cleanVal !== '' && cleanVal.length < 50) { // evitar textos largos accidentales
-                result.demographics.wallets[cleanVal] = (result.demographics.wallets[cleanVal] || 0) + 1;
-              }
-            });
+             const splitVals = String(val).split(/[,;]/);
+             splitVals.forEach(v => {
+               const cleanVal = cleanWalletName(v);
+               if (cleanVal !== '' && cleanVal.length < 50) { // evitar textos largos accidentales
+                 result.demographics.wallets[cleanVal] = (result.demographics.wallets[cleanVal] || 0) + 1;
+               }
+             });
           }
         }
 

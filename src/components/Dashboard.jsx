@@ -11,8 +11,123 @@ import {
 const COLORS_LIGHT = ['#1a73e8', '#12b5cb', '#ab47bc', '#34a853', '#fbbc05', '#e91e63', '#ff5722', '#607d8b'];
 const COLORS_DARK = ['#8ab4f8', '#78d9ec', '#c58af9', '#81c995', '#fdd663', '#f48fb1', '#ffab91', '#b0bec5'];
 
+function WalletBrandBadge({ name }) {
+  const lower = name.toLowerCase().trim();
+  
+  const badgeStyle = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+    height: '20px',
+    padding: '1px 8px',
+    borderRadius: '10px',
+    fontSize: '11px',
+    fontWeight: 500,
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    maxWidth: '180px'
+  };
+
+  if (lower.includes('mercado') && lower.includes('pago')) {
+    return (
+      <div style={{ ...badgeStyle, backgroundColor: '#009ee3', color: '#ffffff', fontWeight: 600 }}>
+        Mercado Pago
+      </div>
+    );
+  }
+  if (lower.includes('apple') && lower.includes('pay')) {
+    return (
+      <div style={{ ...badgeStyle, backgroundColor: '#1d1d1f', color: '#ffffff', fontWeight: 600 }}>
+         Apple Pay
+      </div>
+    );
+  }
+  if (lower.includes('google') && lower.includes('pay')) {
+    return (
+      <div style={{ ...badgeStyle, backgroundColor: '#f1f3f4', border: '1px solid #dadce0', color: '#202124', fontWeight: 600 }}>
+        <span style={{ color: '#4285F4' }}>G</span>
+        <span style={{ color: '#EA4335' }}>o</span>
+        <span style={{ color: '#FBBC05' }}>o</span>
+        <span style={{ color: '#4285F4' }}>g</span>
+        <span style={{ color: '#34A853' }}>l</span>
+        <span style={{ color: '#EA4335' }}>e</span> Pay
+      </div>
+    );
+  }
+  if (lower === 'mach') {
+    return (
+      <div style={{ ...badgeStyle, backgroundColor: '#2f124d', color: '#39ff14', fontWeight: 700, letterSpacing: '0.5px' }}>
+        MACH
+      </div>
+    );
+  }
+  if (lower === 'tenpo') {
+    return (
+      <div style={{ ...badgeStyle, backgroundColor: '#5c10a4', color: '#ffffff', fontWeight: 600 }}>
+        Tenpo
+      </div>
+    );
+  }
+  if (lower.includes('copec')) {
+    return (
+      <div style={{ ...badgeStyle, backgroundColor: '#002f6c', color: '#ffffff', fontWeight: 600 }}>
+        Copec Pay
+      </div>
+    );
+  }
+  if (lower.includes('mi banco') || lower.includes('aplicación') || lower.includes('aplicacion')) {
+    return (
+      <div style={{ ...badgeStyle, backgroundColor: '#e8f0fe', border: '1px solid #1a73e8', color: '#1a73e8', fontWeight: 500 }}>
+        🏦 Mi Banco
+      </div>
+    );
+  }
+  if (lower.includes('bancoestado') || lower.includes('banco estado')) {
+    return (
+      <div style={{ ...badgeStyle, backgroundColor: '#ff5b00', color: '#ffffff', fontWeight: 600 }}>
+        BancoEstado
+      </div>
+    );
+  }
+  if (lower.includes('cencopay')) {
+    return (
+      <div style={{ ...badgeStyle, backgroundColor: '#0072ce', color: '#ffffff', fontWeight: 600 }}>
+        CencoPay
+      </div>
+    );
+  }
+  if (lower.includes('global') && lower.includes('66')) {
+    return (
+      <div style={{ ...badgeStyle, backgroundColor: '#0c1630', color: '#ffd700', fontWeight: 600 }}>
+        Global 66
+      </div>
+    );
+  }
+  if (lower === 'tapp') {
+    return (
+      <div style={{ ...badgeStyle, backgroundColor: '#00bfff', color: '#ffffff', fontWeight: 600 }}>
+        Tapp
+      </div>
+    );
+  }
+  if (lower === 'revolut') {
+    return (
+      <div style={{ ...badgeStyle, backgroundColor: '#000000', color: '#ffffff', fontWeight: 600 }}>
+        Revolut
+      </div>
+    );
+  }
+
+  return (
+    <span style={{ color: 'var(--text-primary)', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '75%' }}>
+      {name}
+    </span>
+  );
+}
+
 // Componente auxiliar para renderizar barras de progreso horizontales minimalistas
-function DemographicsBarList({ title, dataObj, total }) {
+function DemographicsBarList({ title, dataObj, total, limit = null, isWalletList = false }) {
   if (!dataObj || Object.keys(dataObj).length === 0) {
     return (
       <div className="card" style={{ padding: '16px' }}>
@@ -23,9 +138,13 @@ function DemographicsBarList({ title, dataObj, total }) {
   }
 
   // Ordenar de mayor a menor frecuencia
-  const items = Object.keys(dataObj)
+  let items = Object.keys(dataObj)
     .map(name => ({ name, count: dataObj[name] }))
     .sort((a, b) => b.count - a.count);
+
+  if (limit) {
+    items = items.slice(0, limit);
+  }
 
   return (
     <div className="card" style={{ padding: '16px' }}>
@@ -35,8 +154,12 @@ function DemographicsBarList({ title, dataObj, total }) {
           const pct = total > 0 ? ((item.count / total) * 100).toFixed(1) : 0;
           return (
             <div key={item.name} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
-                <span style={{ color: 'var(--text-primary)', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '75%' }}>{item.name}</span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', height: '24px' }}>
+                {isWalletList ? (
+                  <WalletBrandBadge name={item.name} />
+                ) : (
+                  <span style={{ color: 'var(--text-primary)', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '75%' }}>{item.name}</span>
+                )}
                 <span style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>{pct}% <span style={{ fontSize: '10px', color: 'var(--text-tertiary)' }}>({item.count})</span></span>
               </div>
               <div style={{ width: '100%', height: '6px', backgroundColor: 'var(--bg-tertiary)', borderRadius: '3px', overflow: 'hidden' }}>
@@ -301,6 +424,8 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
                     title="Billeteras Preferidas" 
                     dataObj={data.demographics.wallets} 
                     total={data.totalResponses} 
+                    limit={5}
+                    isWalletList={true}
                   />
                   
                   <DemographicsBarList 
