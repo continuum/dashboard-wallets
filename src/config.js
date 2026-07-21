@@ -1,7 +1,7 @@
 /**
  * CONFIGURACIÓN POR DEFECTO PARA EL DASHBOARD
  * 
- * Configura aquí los enlaces de compartir de tus Google Sheets reales.
+ * Configura aquí los enlaces de compartir de tus Google Sheets reales usando variables de entorno.
  * Cualquier persona que visite la web de GitHub Pages verá estos datos por defecto.
  * 
  * Requisito: Las Google Sheets deben estar compartidas con acceso:
@@ -12,19 +12,19 @@ export const DEFAULT_SHEET_CONFIG = {
   sheets: [
     {
       name: 'Encuesta Continuum',
-      url: 'https://docs.google.com/spreadsheets/d/1ZJMRcK4KQjteYy4Fg1Z70GSSd3pkb3jL2wiznigv03A/edit?usp=sharing'
+      url: import.meta.env.VITE_URL_CONTINUUM || ''
     },
     {
       name: 'Encuesta Chócale',
-      url: 'https://docs.google.com/spreadsheets/d/1JFzr1xJe3KKXFL2QMeJ4Unqs9NQqE4IP1fGUICCUxfs/edit?usp=sharing'
+      url: import.meta.env.VITE_URL_CHOCALE || ''
     },
     {
       name: 'Encuesta Chilepay',
-      url: 'https://docs.google.com/spreadsheets/d/1xlB1VMrCvwdy_2g8Cc0PPvwInb-JNhwEaK3P8MWCw6A/edit?usp=sharing'
+      url: import.meta.env.VITE_URL_CHILEPAY || ''
     }
   ]
 };
 
 // Contraseña para proteger el acceso al panel de "Ajustes" en el dashboard.
 // Nota: Dado que es un sitio estático, se valida en el cliente.
-export const CONFIG_PASSWORD = 'continuum_billeteras_2026';
+export const CONFIG_PASSWORD = import.meta.env.VITE_CONFIG_PASSWORD || '';
