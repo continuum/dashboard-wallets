@@ -286,6 +286,157 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
     return q.involvedSurveys.includes(selectedSource);
   });
 
+  const renderQuestionChart = (q, uniqueId) => {
+    const isConsolidated = q.involvedSurveys.length > 1;
+    
+    // Preparar datos del gráfico según el origen seleccionado
+    let chartData = [];
+    if (selectedSource === 'consolidated') {
+      chartData = q.data || [];
+    } else {
+      chartData = q.data ? q.data.map(item => ({
+        name: item.name,
+        cantidad: item[selectedSource] || 0
+      })).filter(item => item.cantidad > 0) : [];
+    }
+
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', height: '100%' }}>
+        {/* Header de la Pregunta */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid var(--border-color)', paddingBottom: '8px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+            <span style={{ fontSize: '13px', fontWeight: 500, color: 'var(--text-secondary)' }}>
+              {q.title.split(':')[0]} {/* Extraer "Importancia" o "Dificultad" */}
+            </span>
+            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '2px' }}>
+              {isConsolidated ? (
+                <span className="badge badge-info" style={{ fontSize: '9px', padding: '1px 4px' }}>Común</span>
+              ) : (
+                <span className="badge" style={{ fontSize: '9px', padding: '1px 4px', backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-secondary)' }}>
+                  Exclusiva
+                </span>
+              )}
+            </div>
+          </div>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+            <span style={{ fontSize: '10px', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>N = {
+              selectedSource === 'consolidated' 
+                ? q.totalCount 
+                : (q.type === 'text' 
+                    ? q.data.filter(c => c.survey === selectedSource).length 
+                    : chartData.reduce((acc, curr) => acc + curr.cantidad, 0)
+                  )
+            }</span>
+          </div>
+        </div>
+
+        {/* 1. Rating/Choice */}
+        {(q.type === 'choice' || q.type === 'rating') && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {q.type === 'rating' && (
+              <div style={{ display: 'flex', gap: '10px', alignItems: 'center', backgroundColor: 'var(--bg-secondary)', padding: '6px 10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', flexWrap: 'wrap', fontSize: '11px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <Star size={13} fill="#fbbc05" stroke="#fbbc05" />
+                  <span style={{ color: 'var(--text-secondary)' }}>Promedio:</span>
+                  <strong style={{ fontWeight: 600 }}>
+                    {selectedSource === 'consolidated' ? q.average : q.averageBySurvey[selectedSource]}
+                  </strong>
+                </div>
+                {selectedSource === 'consolidated' && isConsolidated && (
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', borderLeft: '1px solid var(--border-color)', paddingLeft: '8px' }}>
+                    {q.involvedSurveys.map(s => (
+                      <span key={s} style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>
+                        {s.replace('Encuesta ', '')}: <strong style={{ fontWeight: 500 }}>{q.averageBySurvey[s]}</strong>
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div style={{ width: '100%', height: '180px' }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={chartData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
+                  <CartesianGrid stroke={gridColor} strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="name" stroke="var(--text-secondary)" tick={{ fontSize: 10 }} />
+                  <YAxis stroke="var(--text-secondary)" tick={{ fontSize: 10 }} />
+                  <Tooltip contentStyle={tooltipStyle} cursor={{ fill: 'transparent' }} />
+                  
+                  {selectedSource === 'consolidated' ? (
+                    <>
+                      <Legend wrapperStyle={{ fontSize: 9, paddingTop: 4 }} />
+                      {q.involvedSurveys.map((surveyName, sIdx) => (
+                        <Bar 
+                          key={surveyName} 
+                          dataKey={surveyName} 
+                          name={surveyName.replace('Encuesta ', '')}
+                          stackId="stack" 
+                          fill={colors[data.rawSurveys.findIndex(s => s.name === surveyName) % colors.length]} 
+                        />
+                      ))}
+                    </>
+                  ) : (
+                    <Bar 
+                      dataKey="cantidad" 
+                      name="Respuestas" 
+                      fill={colors[data.rawSurveys.findIndex(s => s.name === selectedSource) % colors.length]} 
+                      radius={[4, 4, 0, 0]}
+                      barSize={24}
+                    />
+                  )}
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        )}
+
+        {/* 2. Text */}
+        {q.type === 'text' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {(() => {
+              const surveyComments = selectedSource === 'consolidated' 
+                ? q.data 
+                : q.data.filter(c => c.survey === selectedSource);
+              
+              if (surveyComments.length === 0) {
+                return <p style={{ fontSize: '12px', color: 'var(--text-tertiary)', fontStyle: 'italic' }}>Sin comentarios.</p>;
+              }
+
+              return (
+                <>
+                  <button 
+                    className="btn btn-secondary" 
+                    onClick={() => toggleExpand(uniqueId)}
+                    style={{ alignSelf: 'flex-start', padding: '4px 10px', fontSize: '11px', height: 'auto' }}
+                  >
+                    {expandedQuestions[uniqueId] ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                    {expandedQuestions[uniqueId] ? 'Ocultar comentarios' : `Ver comentarios (${surveyComments.length})`}
+                  </button>
+
+                  {expandedQuestions[uniqueId] && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '180px', overflowY: 'auto', paddingRight: '4px', marginTop: '4px', borderTop: '1px solid var(--border-color)', paddingTop: '6px' }}>
+                      {surveyComments.map((c, cIdx) => (
+                        <div key={cIdx} style={{ padding: '6px 8px', backgroundColor: 'var(--bg-secondary)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', fontSize: '11px' }}>
+                          <p style={{ margin: 0, color: 'var(--text-primary)', lineHeight: '1.4' }}>"{c.text}"</p>
+                          {selectedSource === 'consolidated' && (
+                            <span style={{ fontSize: '9px', color: 'var(--text-tertiary)', display: 'block', marginTop: '2px', textAlign: 'right' }}>
+                              &mdash; {c.survey}
+                            </span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
+              );
+            })()}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       
@@ -540,199 +691,128 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
           )}
 
           {/* TAB 2: DESGLOSE DE PREGUNTAS (CON FILTRO DE ORIGEN HÍBRIDO) */}
-          {activeTab === 'breakdown' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          {activeTab === 'breakdown' && (() => {
+            const jtbdPairs = [];
+            const otherQuestions = [];
+            const jobNamesOrder = [
+              'Universalidad',
+              'Seguridad',
+              'Control',
+              'Retribución',
+              'Trazabilidad',
+              'Rentabilidad del saldo',
+              'Gestión de presupuesto',
+              'Acceso para terceros',
+              'Servicios cotidianos',
+              'Diversidad de pagos'
+            ];
+            
+            jobNamesOrder.forEach(job => {
+              const impQuestion = filteredQuestions.find(q => q.title === `Importancia: ${job}`);
+              const difQuestion = filteredQuestions.find(q => q.title === `Dificultad: ${job}`);
               
-              {/* Selector de Origen */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', backgroundColor: 'var(--bg-secondary)', padding: '12px 16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
-                <span style={{ fontSize: '14px', fontWeight: 500, color: 'var(--text-secondary)' }}>Mostrar datos de:</span>
-                <select 
-                  className="text-input" 
-                  value={selectedSource} 
-                  onChange={(e) => setSelectedSource(e.target.value)}
-                  style={{ maxWidth: '320px', padding: '6px 12px', height: '36px', cursor: 'pointer' }}
-                >
-                  <option value="consolidated">Consolidado (Todas las encuestas)</option>
-                  {data.rawSurveys.map(s => (
-                    <option key={s.name} value={s.name}>{s.name}</option>
-                  ))}
-                </select>
-              </div>
+              if (impQuestion || difQuestion) {
+                jtbdPairs.push({
+                  jobName: job,
+                  importance: impQuestion,
+                  difficulty: difQuestion
+                });
+              }
+            });
+            
+            filteredQuestions.forEach(q => {
+              const isJtbd = jobNamesOrder.some(job => 
+                q.title === `Importancia: ${job}` || q.title === `Dificultad: ${job}`
+              );
+              if (!isJtbd) {
+                otherQuestions.push(q);
+              }
+            });
 
-              {/* Listado de Preguntas Filtradas */}
-              {filteredQuestions.length === 0 ? (
-                <p style={{ fontSize: '14px', color: 'var(--text-secondary)', fontStyle: 'italic', textAlign: 'center', padding: '32px' }}>Sin preguntas cargadas para esta selección.</p>
-              ) : (
-                filteredQuestions.map((q, idx) => {
-                  const isConsolidated = q.involvedSurveys.length > 1;
-                  
-                  // Preparar datos del gráfico según el origen seleccionado
-                  let chartData = [];
-                  if (selectedSource === 'consolidated') {
-                    chartData = q.data || [];
-                  } else {
-                    chartData = q.data ? q.data.map(item => ({
-                      name: item.name,
-                      cantidad: item[selectedSource] || 0
-                    })).filter(item => item.cantidad > 0) : [];
-                  }
+            return (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                
+                {/* Selector de Origen */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', backgroundColor: 'var(--bg-secondary)', padding: '12px 16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+                  <span style={{ fontSize: '14px', fontWeight: 500, color: 'var(--text-secondary)' }}>Mostrar datos de:</span>
+                  <select 
+                    className="text-input" 
+                    value={selectedSource} 
+                    onChange={(e) => setSelectedSource(e.target.value)}
+                    style={{ maxWidth: '320px', padding: '6px 12px', height: '36px', cursor: 'pointer' }}
+                  >
+                    <option value="consolidated">Consolidado (Todas las encuestas)</option>
+                    {data.rawSurveys.map(s => (
+                      <option key={s.name} value={s.name}>{s.name}</option>
+                    ))}
+                  </select>
+                </div>
 
-                  const questionUniqueId = `${idx}-${selectedSource}`;
-
-                  return (
-                    <div className="card" key={idx}>
-                      
-                      {/* Header de la Pregunta */}
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: '1', paddingRight: '16px' }}>
-                          <h2 style={{ fontSize: '15px', fontWeight: 500, lineHeight: '1.4' }}>{q.title}</h2>
-                          
-                          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '6px' }}>
-                            {isConsolidated ? (
-                              <span className="badge badge-info">Pregunta Común</span>
-                            ) : (
-                              <span className="badge" style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-secondary)' }}>
-                                Exclusiva
-                              </span>
-                            )}
-                            
-                            {/* Mostrar qué encuestas aportan a esta pregunta */}
-                            {q.involvedSurveys.map(s => (
-                              <span key={s} className="badge" style={{ backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-secondary)' }}>
-                                {s}
-                              </span>
-                            ))}
-                          </div>
+                {/* Listado de Preguntas Filtradas en Filas de Jobs */}
+                {filteredQuestions.length === 0 ? (
+                  <p style={{ fontSize: '14px', color: 'var(--text-secondary)', fontStyle: 'italic', textAlign: 'center', padding: '32px' }}>Sin preguntas cargadas para esta selección.</p>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                    {/* Renderizar los 10 pares de JTBD */}
+                    {jtbdPairs.map(pair => (
+                      <div 
+                        key={pair.jobName} 
+                        style={{ 
+                          border: '1px solid var(--border-color)', 
+                          borderRadius: 'var(--radius-lg)', 
+                          padding: '20px', 
+                          backgroundColor: 'var(--bg-primary)', 
+                          display: 'flex', 
+                          flexDirection: 'column', 
+                          gap: '16px',
+                          boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
+                        }}
+                      >
+                        {/* Row Header */}
+                        <div style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '10px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                          <h3 style={{ fontSize: '15px', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
+                            Job: {pair.jobName}
+                          </h3>
+                          <span style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
+                            {JTBD_DETAILS[pair.jobName] || ''}
+                          </span>
                         </div>
-
-                        {/* Contador de respuestas para la pregunta */}
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', minWidth: '80px' }}>
-                          <span style={{ fontSize: '11px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Respuestas</span>
-                          <strong style={{ fontSize: '20px', fontWeight: 300, color: 'var(--text-primary)' }}>
-                            {selectedSource === 'consolidated' 
-                              ? q.totalCount 
-                              : (q.type === 'text' 
-                                  ? q.data.filter(c => c.survey === selectedSource).length 
-                                  : chartData.reduce((acc, curr) => acc + curr.cantidad, 0)
-                                )
-                            }
-                          </strong>
+                        
+                        {/* Grid de 2 columnas (Importancia y Dificultad) */}
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px' }}>
+                          <div>
+                            {pair.importance ? (
+                              renderQuestionChart(pair.importance, `${pair.jobName}-imp`)
+                            ) : (
+                              <p style={{ fontSize: '12px', color: 'var(--text-tertiary)', fontStyle: 'italic' }}>Sin datos de Importancia para este Job.</p>
+                            )}
+                          </div>
+                          
+                          <div>
+                            {pair.difficulty ? (
+                              renderQuestionChart(pair.difficulty, `${pair.jobName}-dif`)
+                            ) : (
+                              <p style={{ fontSize: '12px', color: 'var(--text-tertiary)', fontStyle: 'italic' }}>Sin datos de Dificultad para este Job.</p>
+                            )}
+                          </div>
                         </div>
                       </div>
+                    ))}
 
-                      {/* Contenido según Tipo de Pregunta */}
-
-                      {/* 1. Opción Múltiple (Choice) o Escala (Rating) */}
-                      {(q.type === 'choice' || q.type === 'rating') && (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                          
-                          {/* Promedio de valoración si es rating */}
-                          {q.type === 'rating' && (
-                            <div style={{ display: 'flex', gap: '16px', alignItems: 'center', backgroundColor: 'var(--bg-secondary)', padding: '10px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', flexWrap: 'wrap' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                <Star size={16} fill="#fbbc05" stroke="#fbbc05" />
-                                <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Promedio:</span>
-                                <strong style={{ fontSize: '14px', fontWeight: 500 }}>
-                                  {selectedSource === 'consolidated' ? q.average : q.averageBySurvey[selectedSource]}
-                                </strong>
-                              </div>
-                              {selectedSource === 'consolidated' && isConsolidated && (
-                                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', borderLeft: '1px solid var(--border-color)', paddingLeft: '16px' }}>
-                                  {q.involvedSurveys.map(s => (
-                                    <span key={s} style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
-                                      {s}: <strong style={{ fontWeight: 500 }}>{q.averageBySurvey[s]}</strong>
-                                    </span>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                          )}
-
-                          {/* Gráficos de Recharts */}
-                          <div style={{ width: '100%', height: '220px' }}>
-                            <ResponsiveContainer width="100%" height="100%">
-                              <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                                <CartesianGrid stroke={gridColor} strokeDasharray="3 3" vertical={false} />
-                                <XAxis dataKey="name" stroke="var(--text-secondary)" tick={{ fontSize: 11 }} />
-                                <YAxis stroke="var(--text-secondary)" tick={{ fontSize: 11 }} />
-                                <Tooltip contentStyle={tooltipStyle} cursor={{ fill: 'transparent' }} />
-                                
-                                {selectedSource === 'consolidated' ? (
-                                  <>
-                                    <Legend wrapperStyle={{ fontSize: 11, paddingTop: 10 }} />
-                                    {q.involvedSurveys.map((surveyName, sIdx) => (
-                                      <Bar 
-                                        key={surveyName} 
-                                        dataKey={surveyName} 
-                                        name={surveyName}
-                                        stackId="stack" 
-                                        fill={colors[data.rawSurveys.findIndex(s => s.name === surveyName) % colors.length]} 
-                                      />
-                                    ))}
-                                  </>
-                                ) : (
-                                  <Bar 
-                                    dataKey="cantidad" 
-                                    name="Respuestas" 
-                                    fill={colors[data.rawSurveys.findIndex(s => s.name === selectedSource) % colors.length]} 
-                                    radius={[4, 4, 0, 0]}
-                                    barSize={30}
-                                  />
-                                )}
-                              </BarChart>
-                            </ResponsiveContainer>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* 2. Respuestas de Texto Libre */}
-                      {q.type === 'text' && (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                          {(() => {
-                            const surveyComments = selectedSource === 'consolidated' 
-                              ? q.data 
-                              : q.data.filter(c => c.survey === selectedSource);
-                            
-                            if (surveyComments.length === 0) {
-                              return <p style={{ fontSize: '13px', color: 'var(--text-tertiary)', fontStyle: 'italic' }}>Sin comentarios.</p>;
-                            }
-
-                            return (
-                              <>
-                                <button 
-                                  className="btn btn-secondary" 
-                                  onClick={() => toggleExpand(questionUniqueId)}
-                                  style={{ alignSelf: 'flex-start', padding: '6px 12px', fontSize: '12px', height: 'auto' }}
-                                >
-                                  {expandedQuestions[questionUniqueId] ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                                  {expandedQuestions[questionUniqueId] ? 'Ocultar comentarios' : `Ver comentarios (${surveyComments.length})`}
-                                </button>
-
-                                {expandedQuestions[questionUniqueId] && (
-                                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '250px', overflowY: 'auto', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', padding: '8px', marginTop: '4px', backgroundColor: 'var(--bg-secondary)' }}>
-                                    {surveyComments.map((c, cIdx) => (
-                                      <div key={cIdx} style={{ padding: '8px 12px', borderBottom: cIdx < surveyComments.length - 1 ? '1px solid var(--border-color)' : 'none', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                        {selectedSource === 'consolidated' && (
-                                          <span className="badge" style={{ backgroundColor: 'var(--bg-primary)', border: '1px solid var(--border-color)', color: 'var(--text-secondary)', fontSize: '10px', alignSelf: 'flex-start' }}>
-                                            {c.survey}
-                                          </span>
-                                        )}
-                                        <p style={{ fontSize: '13px', color: 'var(--text-primary)', fontWeight: 300, margin: 0 }}>"{c.text}"</p>
-                                      </div>
-                                    ))}
-                                  </div>
-                                )}
-                              </>
-                            );
-                          })()}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })
-              )}
-            </div>
-          )}
+                    {/* Renderizar otras preguntas que no son JTBD (como comentarios finales) */}
+                    {otherQuestions.map((q, idx) => (
+                      <div key={`other-${idx}`} className="card" style={{ padding: '20px' }}>
+                        <h3 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)', borderBottom: '1px solid var(--border-color)', paddingBottom: '10px', marginBottom: '16px' }}>
+                          {q.title}
+                        </h3>
+                        {renderQuestionChart(q, `other-${idx}`)}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })()}
         </>
       )}
 
