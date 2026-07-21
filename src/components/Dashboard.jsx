@@ -173,6 +173,49 @@ function DemographicsBarList({ title, dataObj, total, limit = null, isWalletList
   );
 }
 
+function SurveyBrandBadge({ name }) {
+  const lower = name.toLowerCase();
+  
+  const badgeStyle = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+    height: '24px',
+    padding: '2px 10px',
+    borderRadius: '6px',
+    fontSize: '12px',
+    fontWeight: 600,
+    boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+    whiteSpace: 'nowrap'
+  };
+
+  if (lower.includes('continuum')) {
+    return (
+      <div style={{ ...badgeStyle, backgroundColor: '#0f172a', color: '#ffffff' }}>
+        <span style={{ color: '#00d2ff', marginRight: '-2px' }}>/</span> Continuum
+      </div>
+    );
+  }
+  if (lower.includes('chócale') || lower.includes('chocale')) {
+    return (
+      <div style={{ ...badgeStyle, backgroundColor: '#f25c05', color: '#ffffff' }}>
+        Chócale
+      </div>
+    );
+  }
+  if (lower.includes('chilepay') || lower.includes('chile pay')) {
+    return (
+      <div style={{ ...badgeStyle, backgroundColor: '#002855', color: '#ffffff' }}>
+        <span style={{ color: '#da291c', marginRight: '2px' }}>★</span> Chilepay
+      </div>
+    );
+  }
+
+  return (
+    <span style={{ fontSize: '13px', fontWeight: 500, color: 'var(--text-secondary)' }}>{name}</span>
+  );
+}
+
 export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefreshing }) {
   const [activeTab, setActiveTab] = useState('summary'); // 'summary', 'breakdown'
   const [selectedSource, setSelectedSource] = useState('consolidated');
@@ -289,25 +332,30 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
           {activeTab === 'summary' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
               
-              {/* Stat Cards Grid */}
-              <div className="grid-cols-3">
-                <div className="card">
-                  <div className="stat-box">
-                    <span className="stat-label">Total Consolidado de Respuestas</span>
-                    <span className="stat-value">{data.totalResponses}</span>
-                  </div>
-                  <Users size={20} style={{ position: 'absolute', right: '20px', top: '24px', color: 'var(--text-tertiary)' }} />
+              {/* Stat Cards Grid - Dos columnas (Consolidado Grande Izq / Individuales Der) */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '16px', marginBottom: '8px' }}>
+                {/* Columna Izquierda: Consolidado */}
+                <div className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '24px 32px', position: 'relative', minHeight: '180px' }}>
+                  <span style={{ fontSize: '13px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.8px', fontWeight: 500 }}>
+                    Respuestas Consolidadas
+                  </span>
+                  <span style={{ fontSize: '64px', fontWeight: 200, color: 'var(--accent-color)', marginTop: '8px', lineHeight: 1 }}>
+                    {data.totalResponses}
+                  </span>
+                  <Users size={32} style={{ position: 'absolute', right: '32px', top: '32px', color: 'var(--text-tertiary)', opacity: 0.3 }} />
                 </div>
-                
-                {data.rawSurveys.map((survey, index) => (
-                  <div className="card" key={survey.name}>
-                    <div className="stat-box">
-                      <span className="stat-label">{survey.name}</span>
-                      <span className="stat-value">{survey.rows.length}</span>
+
+                {/* Columna Derecha: Individuales apiladas */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', justifyContent: 'space-between' }}>
+                  {data.rawSurveys.map((survey, index) => (
+                    <div className="card" key={survey.name} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 20px', minHeight: '52px', margin: 0 }}>
+                      <SurveyBrandBadge name={survey.name} />
+                      <span style={{ fontSize: '20px', fontWeight: 500, color: 'var(--text-primary)' }}>
+                        {survey.rows.length}
+                      </span>
                     </div>
-                    <FileText size={20} style={{ position: 'absolute', right: '20px', top: '24px', color: colors[index % colors.length] }} />
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
 
               {/* Sección A: Mapa de Oportunidad de Jobs to be Done (JTBD) */}
