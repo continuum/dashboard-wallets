@@ -8,6 +8,7 @@ import { aggregateSurveyData } from './utils/dataAggregator';
 import ConfigPanel from './components/ConfigPanel';
 import Dashboard from './components/Dashboard';
 import { DEFAULT_SHEET_CONFIG, CONFIG_PASSWORD } from './config';
+import logoContinuum from './assets/logo-continuum.png';
 
 export default function App() {
   const [config, setConfig] = useState(null);
@@ -248,10 +249,17 @@ export default function App() {
       {/* App Header */}
       <header className="app-header">
         <div className="header-logo" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ fontSize: '20px', fontWeight: 600, color: 'var(--text-primary)', display: 'flex', alignItems: 'center' }}>
-            <span style={{ color: '#00d2ff', fontWeight: 700, marginRight: '2px' }}>/</span>continuum
-          </span>
-          <span style={{ fontSize: '13px', color: 'var(--text-secondary)', borderLeft: '1px solid var(--border-color)', paddingLeft: '8px', marginLeft: '4px', fontWeight: 400 }}>
+          <img 
+            src={logoContinuum} 
+            alt="Continuum" 
+            style={{ 
+              height: '20px', 
+              display: 'block',
+              filter: theme === 'dark' ? 'brightness(0) invert(1)' : 'none',
+              opacity: theme === 'dark' ? 0.95 : 1
+            }} 
+          />
+          <span style={{ fontSize: '13px', color: 'var(--text-secondary)', borderLeft: '1px solid var(--border-color)', paddingLeft: '8px', marginLeft: '8px', fontWeight: 400 }}>
             Estudio Billeteras 2026
           </span>
         </div>
