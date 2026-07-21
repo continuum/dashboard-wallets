@@ -6,7 +6,7 @@ import {
 } from 'recharts';
 import { 
   Group, GraphUp as IconoirBarChart, Database, Calendar, 
-  Star, NavArrowDown, NavArrowUp, WarningCircle, InfoCircle, StatsReport,
+  Star, NavArrowDown, NavArrowUp, NavArrowRight, WarningCircle, InfoCircle, StatsReport,
   Maximize, Xmark
 } from 'iconoir-react';
 
@@ -713,7 +713,7 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
                   style={{ 
                     display: 'flex', 
                     flexDirection: 'column', 
-                    justifyContent: 'flex-start', 
+                    justifyContent: 'center', 
                     padding: '24px 32px', 
                     position: 'relative', 
                     minHeight: '180px',
@@ -782,40 +782,44 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
                         onClick={() => handleSurveyCardClick(survey.name)}
                         style={{ 
                           display: 'flex', 
-                          flexDirection: 'column', 
-                          justifyContent: 'center', 
-                          padding: '12px 20px', 
-                          minHeight: '52px', 
+                          flexDirection: 'row', 
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          padding: '16px 24px', 
+                          minHeight: '120px', 
                           margin: 0, 
-                          position: 'relative',
                           cursor: 'pointer',
                           ...cardBgStyle
                         }}
                         title={`Haz clic para ver el desglose detallado filtrado por ${survey.name}`}
                       >
-                        <span style={{ fontSize: '11px', color: textSecondaryColor, textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>
-                          {getSurveyLabel(survey.name)}
-                        </span>
-                        <span style={{ fontSize: '20px', fontWeight: 800, color: textPrimaryColor, marginTop: '4px' }}>
-                          {survey.rows.length}
-                        </span>
-                        {logoImg && (
-                          <img 
-                            src={logoImg} 
-                            alt={survey.name} 
-                            style={{ 
-                              position: 'absolute', 
-                              right: '16px', 
-                              top: '50%', 
-                              transform: 'translateY(-50%)', 
-                              height: '24px', 
-                              maxWidth: '64px',
-                              objectFit: 'contain',
-                              borderRadius: '4px',
-                              opacity: 0.95
-                            }} 
-                          />
-                        )}
+                        {/* Lado Izquierdo: Texto arriba, logo abajo */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-start' }}>
+                          <span style={{ fontSize: '11px', color: textSecondaryColor, textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>
+                            {getSurveyLabel(survey.name)}
+                          </span>
+                          {logoImg && (
+                            <img 
+                              src={logoImg} 
+                              alt={survey.name} 
+                              style={{ 
+                                height: '80px', 
+                                width: 'auto',
+                                objectFit: 'contain',
+                                display: 'block',
+                                borderRadius: '4px'
+                              }} 
+                            />
+                          )}
+                        </div>
+
+                        {/* Lado Derecho: Número grande y flecha */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <span style={{ fontSize: '40px', fontWeight: 800, color: textPrimaryColor, lineHeight: 1 }}>
+                            {survey.rows.length}
+                          </span>
+                          <NavArrowRight size={24} style={{ color: textSecondaryColor, flexShrink: 0 }} />
+                        </div>
                       </div>
                     );
                   })}
