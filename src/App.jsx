@@ -7,7 +7,7 @@ import { fetchSheetData } from './utils/sheetFetcher';
 import { aggregateSurveyData } from './utils/dataAggregator';
 import ConfigPanel from './components/ConfigPanel';
 import Dashboard from './components/Dashboard';
-import { DEFAULT_SHEET_CONFIG } from './config';
+import { DEFAULT_SHEET_CONFIG, CONFIG_PASSWORD } from './config';
 
 export default function App() {
   const [config, setConfig] = useState(null);
@@ -17,6 +17,13 @@ export default function App() {
   const [error, setError] = useState(null);
   const [showConfig, setShowConfig] = useState(false);
   const [theme, setTheme] = useState('system'); // 'system', 'light', 'dark'
+
+  // Estados para proteger Ajustes y Restablecer
+  const [isUnlocked, setIsUnlocked] = useState(false);
+  const [showPasswordPrompt, setShowPasswordPrompt] = useState(false);
+  const [passwordInput, setPasswordInput] = useState('');
+  const [passwordError, setPasswordError] = useState(false);
+  const [pendingAction, setPendingAction] = useState(null); // 'settings' | 'reset'
 
   const applyTheme = (themeName) => {
     const root = document.documentElement;
@@ -156,7 +163,7 @@ export default function App() {
   };
 
   // 4. Volver a datos Mock / Restablecer configuración
-  const handleResetConfig = () => {
+  const confirmResetConfig = () => {
     if (window.confirm('¿Estás seguro de que deseas eliminar la configuración personalizada? Se volverá a cargar la configuración por defecto de la aplicación.')) {
       localStorage.removeItem('survey_config');
       localStorage.removeItem('survey_cache_data');
@@ -173,6 +180,51 @@ export default function App() {
       }
       setError(null);
       setShowConfig(false);
+    }
+  };
+
+  const handleResetConfig = () => {
+    if (isUnlocked || !CONFIG_PASSWORD) {
+      confirmResetConfig();
+    } else {
+      setPendingAction('reset');
+      setShowPasswordPrompt(true);
+      setPasswordError(false);
+      setPasswordInput('');
+    }
+  };
+
+  // 5. Manejo de botones protegidos por contraseña
+  const handleSettingsClick = () => {
+    if (showConfig) {
+      setShowConfig(false);
+      return;
+    }
+    if (isUnlocked || !CONFIG_PASSWORD) {
+      setShowConfig(true);
+    } else {
+      setPendingAction('settings');
+      setShowPasswordPrompt(true);
+      setPasswordError(false);
+      setPasswordInput('');
+    }
+  };
+
+  const handlePasswordSubmit = (e) => {
+    e.preventDefault();
+    if (passwordInput === CONFIG_PASSWORD) {
+      setIsUnlocked(true);
+      setShowPasswordPrompt(false);
+      setPasswordError(false);
+      
+      if (pendingAction === 'settings') {
+        setShowConfig(true);
+      } else if (pendingAction === 'reset') {
+        confirmResetConfig();
+      }
+      setPendingAction(null);
+    } else {
+      setPasswordError(true);
     }
   };
 
@@ -213,7 +265,7 @@ export default function App() {
           
           <button 
             className="btn btn-secondary"
-            onClick={() => setShowConfig(!showConfig)}
+            onClick={handleSettingsClick}
             style={{ height: '36px', padding: '0 12px' }}
           >
             <Settings size={16} />
@@ -271,7 +323,7 @@ export default function App() {
               </div>
               <button 
                 className="btn btn-primary"
-                onClick={() => setShowConfig(true)}
+                onClick={handleSettingsClick}
                 style={{ padding: '10px 24px' }}
               >
                 Configurar Hojas de Google Sheets
@@ -309,7 +361,7 @@ export default function App() {
                     </button>
                     <button 
                       className="btn btn-secondary"
-                      onClick={() => setShowConfig(true)}
+                      onClick={handleSettingsClick}
                     >
                       Revisar Enlaces
                     </button>
@@ -325,6 +377,65 @@ export default function App() {
       <footer style={{ borderTop: '1px solid var(--border-color)', padding: '16px', textAlign: 'center', color: 'var(--text-tertiary)', fontSize: '12px', marginTop: 'auto' }}>
         Survey Dashboard &copy; {new Date().getFullYear()} &bull; Desarrollado para Google Sheets
       </footer>
+
+      {/* Modal de prompt de contraseña */}
+      {showPasswordPrompt && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 2000,
+          backdropFilter: 'blur(2px)'
+        }}>
+          <div className="card" style={{ maxWidth: '360px', width: '100%', padding: '24px', margin: '16px', display: 'flex', flexDirection: 'column', gap: '16px', boxShadow: '0 4px 20px rgba(0,0,0,0.15)' }}>
+            <h3 style={{ fontSize: '15px', fontWeight: 500, margin: 0 }}>Acceso Protegido</h3>
+            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: 0, lineHeight: '1.5' }}>
+              Ingresa la contraseña del sistema para poder modificar la configuración de las encuestas.
+            </p>
+            
+            <form onSubmit={handlePasswordSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <input 
+                type="password"
+                className="text-input"
+                placeholder="Contraseña"
+                value={passwordInput}
+                onChange={(e) => setPasswordInput(e.target.value)}
+                autoFocus
+                style={{ width: '100%', height: '36px', padding: '0 12px' }}
+              />
+              {passwordError && (
+                <span style={{ fontSize: '12px', color: 'var(--danger-color)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  Contraseña incorrecta. Inténtalo de nuevo.
+                </span>
+              )}
+              
+              <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '4px' }}>
+                <button 
+                  type="button" 
+                  className="btn btn-secondary"
+                  onClick={() => setShowPasswordPrompt(false)}
+                  style={{ height: '32px', padding: '0 12px', fontSize: '12px' }}
+                >
+                  Cancelar
+                </button>
+                <button 
+                  type="submit" 
+                  className="btn btn-primary"
+                  style={{ height: '32px', padding: '0 16px', fontSize: '12px' }}
+                >
+                  Acceder
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
     </div>
   );
