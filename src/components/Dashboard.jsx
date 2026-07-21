@@ -16,9 +16,6 @@ import logoCopec from '../assets/copec.png';
 import logoGoogleWallet from '../assets/google-wallet.png';
 import logoMiBanco from '../assets/mi-banco.png';
 
-import imgContinuumLogo from '../assets/continuum-logo.png';
-import imgChocaleLogo from '../assets/chocale-logo.png';
-import imgChilepayLogo from '../assets/chilepay-logo.jpg';
 
 const COLORS_LIGHT = ['#1a73e8', '#12b5cb', '#ab47bc', '#34a853', '#fbbc05', '#e91e63', '#ff5722', '#607d8b'];
 const COLORS_DARK = ['#8ab4f8', '#78d9ec', '#c58af9', '#81c995', '#fdd663', '#f48fb1', '#ffab91', '#b0bec5'];
@@ -682,6 +679,10 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
           </h1>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <p style={{ fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px', margin: 0, color: 'var(--text-secondary)' }}>
+            <Calendar size={14} />
+            Última sincronización: {formatLastUpdated(lastUpdated)}
+          </p>
           <button 
             className="btn btn-secondary btn-sync" 
             onClick={onForceRefresh} 
@@ -695,10 +696,6 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
             <Database size={16} className={isRefreshing ? 'animate-spin' : ''} />
             {isRefreshing ? 'Actualizando...' : 'Sincronizar ahora'}
           </button>
-          <p style={{ fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px', margin: 0, color: 'var(--text-secondary)' }}>
-            <Calendar size={14} />
-            Última sincronización: {formatLastUpdated(lastUpdated)}
-          </p>
         </div>
       </div>
 
@@ -751,10 +748,10 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
                   }}
                   title="Haz clic para ver el desglose detallado de todas las respuestas"
                 >
-                  <span style={{ fontSize: '13px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.8px', fontWeight: 500 }}>
+                  <span style={{ fontSize: '14px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.8px', fontWeight: 500 }}>
                     Respuestas Totales
                   </span>
-                  <span style={{ fontSize: '64px', fontWeight: 200, color: 'var(--accent-color)', marginTop: '8px', lineHeight: 1 }}>
+                  <span style={{ fontSize: '110px', fontWeight: 200, color: 'var(--accent-color)', marginTop: '8px', lineHeight: 1 }}>
                     {data.totalResponses}
                   </span>
                   <Group size={32} style={{ position: 'absolute', right: '32px', top: '32px', color: 'var(--text-tertiary)', opacity: 0.3 }} />
@@ -765,15 +762,14 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
                   {data.rawSurveys.map((survey, index) => {
                     const getSurveyLabel = (name) => {
                       const lower = name.toLowerCase();
-                      if (lower.includes('continuum')) return 'Respuestas Continuum';
-                      if (lower.includes('chócale') || lower.includes('chocale')) return 'Respuestas Chócale';
-                      if (lower.includes('chilepay') || lower.includes('chile pay')) return 'Respuestas ChilePay';
-                      return `Respuestas ${name}`;
+                      if (lower.includes('continuum')) return 'Resultados Continuum';
+                      if (lower.includes('chócale') || lower.includes('chocale')) return 'Resultados Chócale';
+                      if (lower.includes('chilepay') || lower.includes('chile pay')) return 'Resultados ChilePay';
+                      return `Resultados ${name}`;
                     };
 
                     const lower = survey.name.toLowerCase();
                     let cardBgStyle = {};
-                    let logoImg = null;
                     let textPrimaryColor = 'var(--text-primary)';
                     let textSecondaryColor = 'var(--text-secondary)';
                     
@@ -782,7 +778,6 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
                         background: 'linear-gradient(135deg, #0c1020 0%, #081a3d 50%, #042cb0 100%)',
                         border: 'none'
                       };
-                      logoImg = imgContinuumLogo;
                       textPrimaryColor = '#ffffff';
                       textSecondaryColor = 'rgba(255, 255, 255, 0.7)';
                     } else if (lower.includes('chócale') || lower.includes('chocale')) {
@@ -790,15 +785,13 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
                         backgroundColor: '#1f2229', // Color oscuro de su logo
                         border: 'none'
                       };
-                      logoImg = imgChocaleLogo;
                       textPrimaryColor = '#ffffff';
-                      textSecondaryColor = 'rgba(255, 255, 255, 0.7)';
+                      textSecondaryColor = '#6AE3B4'; // Etiqueta en #6AE3B4
                     } else if (lower.includes('chilepay') || lower.includes('chile pay')) {
                       cardBgStyle = {
                         backgroundColor: '#7e378c', // Morado principal
                         border: 'none'
                       };
-                      logoImg = imgChilepayLogo;
                       textPrimaryColor = '#ffffff';
                       textSecondaryColor = 'rgba(255, 255, 255, 0.7)';
                     }
@@ -814,43 +807,18 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
                           justifyContent: 'space-between',
                           alignItems: 'center',
                           padding: '16px 24px', 
-                          minHeight: '120px', 
+                          minHeight: '76px', 
                           margin: 0, 
                           cursor: 'pointer',
                           ...cardBgStyle
                         }}
                         title={`Haz clic para ver el desglose detallado filtrado por ${survey.name}`}
                       >
-                        {/* Lado Izquierdo: Texto arriba, logo abajo */}
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-start' }}>
-                          <span style={{ fontSize: '11px', color: textSecondaryColor, textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>
+                        {/* Lado Izquierdo: Solo texto en 14px */}
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                          <span style={{ fontSize: '14px', color: textSecondaryColor, textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>
                             {getSurveyLabel(survey.name)}
                           </span>
-                          {logoImg && (
-                            <div style={{ 
-                              width: '80px', 
-                              height: '80px', 
-                              borderRadius: '50%', 
-                              overflow: 'hidden', 
-                              display: 'flex', 
-                              alignItems: 'center', 
-                              justifyContent: 'center', 
-                              backgroundColor: '#ffffff',
-                              boxShadow: 'var(--shadow-sm)',
-                              border: '1px solid rgba(255, 255, 255, 0.15)'
-                            }}>
-                              <img 
-                                src={logoImg} 
-                                alt={survey.name} 
-                                style={{ 
-                                  height: '70%', 
-                                  width: '70%',
-                                  objectFit: 'contain',
-                                  display: 'block'
-                                }} 
-                              />
-                            </div>
-                          )}
                         </div>
 
                         {/* Lado Derecho: Número grande y flecha */}
