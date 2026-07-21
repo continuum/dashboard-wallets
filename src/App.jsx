@@ -259,9 +259,6 @@ export default function App() {
               opacity: theme === 'dark' ? 0.95 : 1
             }} 
           />
-          <span style={{ fontSize: '13px', color: 'var(--text-secondary)', borderLeft: '1px solid var(--border-color)', paddingLeft: '8px', marginLeft: '8px', fontWeight: 400 }}>
-            Estudio Billeteras 2026
-          </span>
         </div>
         <div className="header-actions">
           <button 

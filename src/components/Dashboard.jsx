@@ -294,7 +294,7 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
         <div>
           <h1 style={{ fontSize: '22px', fontWeight: 400, display: 'flex', alignItems: 'center', gap: '8px' }}>
             <BarChart3 style={{ color: 'var(--accent-color)' }} />
-            Estudio Billeteras Digitales
+            Estudio Billeteras Digitales 2026
           </h1>
           <p style={{ fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
             <Calendar size={14} />
