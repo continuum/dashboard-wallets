@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
-  Settings, Database, HelpCircle, FileSpreadsheet, RefreshCw, AlertTriangle,
+  Settings, RefreshCw, AlertTriangle,
   Sun, Moon, Monitor
 } from 'lucide-react';
 import { fetchSheetData } from './utils/sheetFetcher';
@@ -244,8 +244,17 @@ export default function App() {
   }, [config, lastUpdated, triggerRefresh, isRefreshing]);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', position: 'relative', overflowX: 'hidden' }}>
       
+      {/* Fondo difuminado de círculos de color (estilo ContinuumHQ) */}
+      <div className="blurry-bg-container">
+        <div className="circle circle-1"></div>
+        <div className="circle circle-2"></div>
+        <div className="circle circle-3"></div>
+        <div className="circle circle-4"></div>
+        <div className="circle circle-5"></div>
+      </div>
+
       {/* App Header */}
       <header className="app-header">
         <div className="header-logo" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
