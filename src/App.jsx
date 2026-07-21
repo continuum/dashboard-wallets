@@ -5,7 +5,6 @@ import {
 } from 'lucide-react';
 import { fetchSheetData } from './utils/sheetFetcher';
 import { aggregateSurveyData } from './utils/dataAggregator';
-import { MOCK_SURVEYS } from './utils/mockData';
 import ConfigPanel from './components/ConfigPanel';
 import Dashboard from './components/Dashboard';
 import { DEFAULT_SHEET_CONFIG } from './config';
@@ -17,7 +16,6 @@ export default function App() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState(null);
   const [showConfig, setShowConfig] = useState(false);
-  const [isUsingMocks, setIsUsingMocks] = useState(false);
   const [theme, setTheme] = useState('system'); // 'system', 'light', 'dark'
 
   const applyTheme = (themeName) => {
@@ -69,7 +67,6 @@ export default function App() {
         
         setData(parsedData);
         setLastUpdated(timestamp);
-        setIsUsingMocks(false);
 
         // Verificar si el caché ha expirado
         const expiryMs = activeConfig.syncHours * 60 * 60 * 1000;
@@ -82,11 +79,9 @@ export default function App() {
         triggerRefresh(activeConfig, false);
       }
     } else {
-      // Sin configuración ni valores por defecto: Cargar datos Mock de demostración
-      const aggregatedMocks = aggregateSurveyData(MOCK_SURVEYS);
-      setData(aggregatedMocks);
-      setLastUpdated(Date.now());
-      setIsUsingMocks(true);
+      // Sin configuración ni valores por defecto: inicializar vacío
+      setData(null);
+      setLastUpdated(null);
     }
   }, []);
 
@@ -122,7 +117,6 @@ export default function App() {
 
       setData(consolidated);
       setLastUpdated(Date.now());
-      setIsUsingMocks(false);
     } catch (err) {
       console.error('Error al sincronizar las encuestas:', err);
       if (!background) {
@@ -160,10 +154,8 @@ export default function App() {
         triggerRefresh(DEFAULT_SHEET_CONFIG, false);
       } else {
         setConfig(null);
-        const aggregatedMocks = aggregateSurveyData(MOCK_SURVEYS);
-        setData(aggregatedMocks);
-        setLastUpdated(Date.now());
-        setIsUsingMocks(true);
+        setData(null);
+        setLastUpdated(null);
       }
       setError(null);
       setShowConfig(false);
@@ -194,12 +186,6 @@ export default function App() {
           <span className="header-title">Survey Dashboard</span>
         </div>
         <div className="header-actions">
-          {isUsingMocks && (
-            <span className="badge badge-info" style={{ padding: '6px 12px', fontSize: '12px' }}>
-              Modo Demostración (Datos Mock)
-            </span>
-          )}
-          
           <button 
             className="btn btn-secondary btn-icon"
             onClick={cycleTheme}
@@ -260,13 +246,39 @@ export default function App() {
             showCancel={!!config}
           />
         ) : (
-          data && (
-            <Dashboard 
-              data={data}
-              lastUpdated={lastUpdated}
-              onForceRefresh={() => triggerRefresh(config, false)}
-              isRefreshing={isRefreshing}
-            />
+          !config ? (
+            <div className="card" style={{ maxWidth: '540px', margin: '40px auto', width: '100%', textAlign: 'center', padding: '32px 24px', display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center' }}>
+              <AlertTriangle size={48} style={{ color: 'var(--accent-color)' }} />
+              <div>
+                <h2 style={{ fontSize: '18px', fontWeight: 500 }}>Estudio Billeteras Digitales 2026</h2>
+                <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '8px', lineHeight: '1.6' }}>
+                  No hay encuestas configuradas en la aplicación. Para poder visualizar el dashboard consolidado y analizar las metas financieras de los usuarios, debes configurar las URLs de tus hojas de respuestas de Google Sheets.
+                </p>
+              </div>
+              <button 
+                className="btn btn-primary"
+                onClick={() => setShowConfig(true)}
+                style={{ padding: '10px 24px' }}
+              >
+                Configurar Hojas de Google Sheets
+              </button>
+            </div>
+          ) : (
+            isRefreshing && !data ? (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '200px', gap: '16px' }}>
+                <RefreshCw size={32} className="animate-spin" style={{ color: 'var(--accent-color)' }} />
+                <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Cargando datos de las encuestas...</p>
+              </div>
+            ) : (
+              data && (
+                <Dashboard 
+                  data={data}
+                  lastUpdated={lastUpdated}
+                  onForceRefresh={() => triggerRefresh(config, false)}
+                  isRefreshing={isRefreshing}
+                />
+              )
+            )
           )
         )}
       </main>
