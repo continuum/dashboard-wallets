@@ -11,17 +11,16 @@ export const DEFAULT_SHEET_CONFIG = {
   syncHours: 2, // Horas de caché recomendadas
   sheets: [
     {
-      name: 'Encuesta 1',
-      // Reemplaza con tu URL real. Ej: 'https://docs.google.com/spreadsheets/d/XXXX/edit?usp=sharing'
-      url: '' 
+      name: 'Encuesta Continuum',
+      url: 'https://docs.google.com/spreadsheets/d/1ZJMRcK4KQjteYy4Fg1Z70GSSd3pkb3jL2wiznigv03A/edit?usp=sharing'
     },
     {
-      name: 'Encuesta 2',
-      url: ''
+      name: 'Encuesta Chócale',
+      url: 'https://docs.google.com/spreadsheets/d/1JFzr1xJe3KKXFL2QMeJ4Unqs9NQqE4IP1fGUICCUxfs/edit?usp=sharing'
     },
     {
-      name: 'Encuesta 3',
-      url: ''
+      name: 'Encuesta Chilepay',
+      url: 'https://docs.google.com/spreadsheets/d/1xlB1VMrCvwdy_2g8Cc0PPvwInb-JNhwEaK3P8MWCw6A/edit?usp=sharing'
     }
   ]
 };
