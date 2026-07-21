@@ -62,17 +62,31 @@ export default function App() {
       setConfig(activeConfig);
 
       if (cachedDataStr && cachedTimestampStr) {
-        const parsedData = JSON.parse(cachedDataStr);
-        const timestamp = Number(cachedTimestampStr);
-        
-        setData(parsedData);
-        setLastUpdated(timestamp);
+        try {
+          const parsedData = JSON.parse(cachedDataStr);
+          const timestamp = Number(cachedTimestampStr);
 
-        // Verificar si el caché ha expirado
-        const expiryMs = activeConfig.syncHours * 60 * 60 * 1000;
-        if (Date.now() - timestamp > expiryMs) {
-          // Expirado: refrescar en segundo plano de manera asíncrona
-          triggerRefresh(activeConfig, true);
+          // Validar que el caché tenga la estructura esperada de la nueva versión
+          if (parsedData && Array.isArray(parsedData.rawSurveys) && Array.isArray(parsedData.jtbdOpportunityData)) {
+            setData(parsedData);
+            setLastUpdated(timestamp);
+
+            // Verificar si el caché ha expirado
+            const expiryMs = activeConfig.syncHours * 60 * 60 * 1000;
+            if (Date.now() - timestamp > expiryMs) {
+              // Expirado: refrescar en segundo plano de manera asíncrona
+              triggerRefresh(activeConfig, true);
+            }
+          } else {
+            // Estructura incompatible: limpiar e iniciar refresco limpio
+            localStorage.removeItem('survey_cache_data');
+            localStorage.removeItem('survey_cache_timestamp');
+            triggerRefresh(activeConfig, false);
+          }
+        } catch (e) {
+          localStorage.removeItem('survey_cache_data');
+          localStorage.removeItem('survey_cache_timestamp');
+          triggerRefresh(activeConfig, false);
         }
       } else {
         // Con configuración pero sin caché: refrescar en primer plano
@@ -83,7 +97,7 @@ export default function App() {
       setData(null);
       setLastUpdated(null);
     }
-  }, []);
+  }, [triggerRefresh]);
 
   // 2. Función para refrescar datos desde las Google Sheets
   const triggerRefresh = useCallback(async (activeConfig, background = false) => {
@@ -270,13 +284,37 @@ export default function App() {
                 <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Cargando datos de las encuestas...</p>
               </div>
             ) : (
-              data && (
+              data ? (
                 <Dashboard 
                   data={data}
                   lastUpdated={lastUpdated}
                   onForceRefresh={() => triggerRefresh(config, false)}
                   isRefreshing={isRefreshing}
                 />
+              ) : (
+                <div className="card" style={{ maxWidth: '540px', margin: '40px auto', width: '100%', textAlign: 'center', padding: '32px 24px', display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center' }}>
+                  <AlertTriangle size={48} style={{ color: 'var(--danger-color)' }} />
+                  <div>
+                    <h2 style={{ fontSize: '18px', fontWeight: 500 }}>No se pudieron cargar los datos</h2>
+                    <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '8px', lineHeight: '1.6' }}>
+                      Las URLs configuradas no respondieron correctamente. Por favor, asegúrate de que cada Google Sheet esté compartida como <strong>"Cualquier persona con el enlace puede ver" (Lector)</strong> y que los enlaces sean correctos.
+                    </p>
+                  </div>
+                  <div style={{ display: 'flex', gap: '12px' }}>
+                    <button 
+                      className="btn btn-primary"
+                      onClick={() => triggerRefresh(config, false)}
+                    >
+                      Reintentar Sincronización
+                    </button>
+                    <button 
+                      className="btn btn-secondary"
+                      onClick={() => setShowConfig(true)}
+                    >
+                      Revisar Enlaces
+                    </button>
+                  </div>
+                </div>
               )
             )
           )
