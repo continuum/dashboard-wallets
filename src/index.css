@@ -554,10 +554,10 @@ p {
     min-height: 0;
   }
   .jtbd-plotter-container {
-    height: 580px;
+    height: 530px;
   }
   .jtbd-ranking-container {
-    height: 580px;
+    height: 570px;
     justify-content: space-between;
   }
 }
