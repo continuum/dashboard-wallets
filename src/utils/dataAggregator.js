@@ -210,7 +210,7 @@ export function aggregateSurveyData(surveys) {
             // Limpiar emojis o caracteres de lista y separar si es de opción múltiple
             const splitVals = String(val).split(/[,;]/);
             splitVals.forEach(v => {
-              const cleanVal = v.replace(/^[👛\s•-*]+/, '').trim();
+              const cleanVal = v.replace(/^[👛\s•*\-]+/, '').trim();
               if (cleanVal !== '' && cleanVal.length < 50) { // evitar textos largos accidentales
                 result.demographics.wallets[cleanVal] = (result.demographics.wallets[cleanVal] || 0) + 1;
               }
