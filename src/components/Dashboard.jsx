@@ -16,7 +16,6 @@ import logoCopec from '../assets/copec.png';
 import logoGoogleWallet from '../assets/google-wallet.png';
 import logoMiBanco from '../assets/mi-banco.png';
 
-import imgContinuumBg from '../assets/continuum-bg.png';
 import imgContinuumLogo from '../assets/continuum-logo.png';
 import imgChocaleLogo from '../assets/chocale-logo.png';
 import imgChilepayLogo from '../assets/chilepay-logo.jpg';
@@ -165,10 +164,11 @@ function PreferredWalletsCard({ dataObj, total, isExpanded = false, onExpand = n
     const { x, y, payload } = props;
     const item = items.find(i => i.name === payload.value);
     if (item && item.logo) {
+      const safeId = payload.value.replace(/[^a-zA-Z0-9]/g, '-');
       return (
         <g transform={`translate(${x - 14},${y})`}>
           <defs>
-            <clipPath id={`clip-${payload.value.replace(/\s+/g, '-')}`}>
+            <clipPath id={`clip-${safeId}`}>
               <rect width="28" height="28" rx="6" />
             </clipPath>
           </defs>
@@ -178,7 +178,7 @@ function PreferredWalletsCard({ dataObj, total, isExpanded = false, onExpand = n
             y={6} 
             height="28" 
             width="28" 
-            clipPath={`url(#clip-${payload.value.replace(/\s+/g, '-')})`}
+            clipPath={`url(#clip-${safeId})`}
             style={{ borderRadius: '6px' }}
           />
         </g>
@@ -194,11 +194,23 @@ function PreferredWalletsCard({ dataObj, total, isExpanded = false, onExpand = n
     );
   };
 
+  const containerStyle = isExpanded ? {
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100%',
+    width: '100%'
+  } : {
+    padding: '16px',
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100%'
+  };
+
   return (
-    <div className="card" style={{ padding: '16px', display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <div className={isExpanded ? '' : 'card'} style={containerStyle}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '6px', marginBottom: '12px' }}>
-        <h3 style={{ fontSize: '14px', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>
-          Billeteras Preferidas
+        <h3 style={{ fontSize: isExpanded ? '16px' : '14px', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
+          {isExpanded ? 'Billeteras Preferidas (Detalle)' : 'Billeteras Preferidas'}
         </h3>
         {!isExpanded && onExpand && (
           <button 
@@ -211,15 +223,16 @@ function PreferredWalletsCard({ dataObj, total, isExpanded = false, onExpand = n
           </button>
         )}
       </div>
-      <div style={{ flex: 1, minHeight: isExpanded ? '260px' : '180px', width: '100%', marginTop: '10px' }}>
+      <div style={{ flex: 1, minHeight: isExpanded ? '340px' : '180px', width: '100%', marginTop: '10px' }}>
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={items} margin={{ top: 20, right: 10, bottom: 35, left: 10 }}>
+          <BarChart data={items} margin={{ top: 20, right: 10, bottom: isExpanded ? 50 : 40, left: 10 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-color)" opacity={0.3} />
             <XAxis 
               dataKey="name" 
               tick={renderCustomXAxisTick} 
               axisLine={false}
               tickLine={false}
+              height={45}
             />
             <YAxis hide domain={[0, 'dataMax + 10']} />
             <Tooltip 
@@ -300,11 +313,23 @@ function DemographicsPieChart({ title, dataObj, total, isExpanded = false, onExp
     '#64748b'  // Slate / Otros
   ];
 
+  const containerStyle = isExpanded ? {
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100%',
+    width: '100%'
+  } : {
+    padding: '16px',
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100%'
+  };
+
   return (
-    <div className="card" style={{ padding: '16px', display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <div className={isExpanded ? '' : 'card'} style={containerStyle}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '6px', marginBottom: '12px' }}>
-        <h3 style={{ fontSize: '14px', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>
-          {title}
+        <h3 style={{ fontSize: isExpanded ? '16px' : '14px', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
+          {isExpanded ? `${title} (Detalle)` : title}
         </h3>
         {!isExpanded && onExpand && (
           <button 
@@ -317,16 +342,16 @@ function DemographicsPieChart({ title, dataObj, total, isExpanded = false, onExp
           </button>
         )}
       </div>
-      <div style={{ display: 'flex', flex: 1, alignItems: 'center', justifyContent: 'center', minHeight: isExpanded ? '260px' : '180px', position: 'relative' }}>
-        <div style={{ width: isExpanded ? '170px' : '130px', height: isExpanded ? '170px' : '130px' }}>
+      <div style={{ display: 'flex', flex: 1, alignItems: 'center', justifyContent: 'center', minHeight: isExpanded ? '340px' : '180px', position: 'relative' }}>
+        <div style={{ width: isExpanded ? '230px' : '130px', height: isExpanded ? '230px' : '130px' }}>
           <ResponsiveContainer width="100%" height="100%">
             <RechartsPieChart>
               <Pie
                 data={chartData}
                 cx="50%"
                 cy="50%"
-                innerRadius={isExpanded ? 46 : 36}
-                outerRadius={isExpanded ? 75 : 55}
+                innerRadius={isExpanded ? 64 : 36}
+                outerRadius={isExpanded ? 105 : 55}
                 paddingAngle={3}
                 dataKey="value"
               >
@@ -653,22 +678,27 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
         <div>
           <h1 style={{ fontSize: '22px', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px' }}>
             <IconoirBarChart style={{ color: 'var(--accent-color)' }} />
-            Estudio Billeteras Digitales 2026
+            Encuesta Billeteras Digitales 2026
           </h1>
-          <p style={{ fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
-            <Calendar size={14} />
-            Última sincronización: {formatLastUpdated(lastUpdated)}
-          </p>
         </div>
-        <div style={{ display: 'flex', gap: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <button 
             className="btn btn-secondary btn-sync" 
             onClick={onForceRefresh} 
             disabled={isRefreshing}
+            style={isDark ? {
+              border: '1px solid #ffffff',
+              color: '#ffffff',
+              backgroundColor: 'transparent'
+            } : {}}
           >
             <Database size={16} className={isRefreshing ? 'animate-spin' : ''} />
             {isRefreshing ? 'Actualizando...' : 'Sincronizar ahora'}
           </button>
+          <p style={{ fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px', margin: 0, color: 'var(--text-secondary)' }}>
+            <Calendar size={14} />
+            Última sincronización: {formatLastUpdated(lastUpdated)}
+          </p>
         </div>
       </div>
 
@@ -749,9 +779,7 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
                     
                     if (lower.includes('continuum')) {
                       cardBgStyle = {
-                        backgroundImage: `url(${imgContinuumBg})`,
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'center',
+                        background: 'linear-gradient(135deg, #0c1020 0%, #081a3d 50%, #042cb0 100%)',
                         border: 'none'
                       };
                       logoImg = imgContinuumLogo;
@@ -799,17 +827,29 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
                             {getSurveyLabel(survey.name)}
                           </span>
                           {logoImg && (
-                            <img 
-                              src={logoImg} 
-                              alt={survey.name} 
-                              style={{ 
-                                height: '80px', 
-                                width: 'auto',
-                                objectFit: 'contain',
-                                display: 'block',
-                                borderRadius: '4px'
-                              }} 
-                            />
+                            <div style={{ 
+                              width: '80px', 
+                              height: '80px', 
+                              borderRadius: '50%', 
+                              overflow: 'hidden', 
+                              display: 'flex', 
+                              alignItems: 'center', 
+                              justifyContent: 'center', 
+                              backgroundColor: '#ffffff',
+                              boxShadow: 'var(--shadow-sm)',
+                              border: '1px solid rgba(255, 255, 255, 0.15)'
+                            }}>
+                              <img 
+                                src={logoImg} 
+                                alt={survey.name} 
+                                style={{ 
+                                  height: '70%', 
+                                  width: '70%',
+                                  objectFit: 'contain',
+                                  display: 'block'
+                                }} 
+                              />
+                            </div>
                           )}
                         </div>
 
@@ -1159,16 +1199,17 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
             className="card" 
             style={{
               width: '100%',
-              maxWidth: '640px',
-              padding: '24px 28px',
+              maxWidth: '780px',
+              padding: '32px 36px',
               position: 'relative',
               backgroundColor: 'var(--card-bg)',
-              boxShadow: '0 20px 25px -5px rgba(0,0,0,0.3), 0 10px 10px -5px rgba(0,0,0,0.3)',
-              borderRadius: '16px',
+              boxShadow: '0 30px 60px -12px rgba(0,0,0,0.35), 0 18px 36px -18px rgba(0,0,0,0.35)',
+              borderRadius: '24px',
               border: '1px solid var(--border-color)',
               display: 'flex',
               flexDirection: 'column',
-              gap: '12px'
+              gap: '12px',
+              animation: 'stripeZoomIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards'
             }}
             onClick={(e) => e.stopPropagation()}
           >
