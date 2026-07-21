@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
-  Settings, Database, HelpCircle, FileSpreadsheet, RefreshCw, AlertTriangle 
+  Settings, Database, HelpCircle, FileSpreadsheet, RefreshCw, AlertTriangle,
+  Sun, Moon, Monitor
 } from 'lucide-react';
 import { fetchSheetData } from './utils/sheetFetcher';
 import { aggregateSurveyData } from './utils/dataAggregator';
@@ -16,9 +17,35 @@ export default function App() {
   const [error, setError] = useState(null);
   const [showConfig, setShowConfig] = useState(false);
   const [isUsingMocks, setIsUsingMocks] = useState(false);
+  const [theme, setTheme] = useState('system'); // 'system', 'light', 'dark'
 
-  // 1. Cargar configuración y caché desde localStorage al iniciar
+  const applyTheme = (themeName) => {
+    const root = document.documentElement;
+    root.classList.remove('theme-light', 'theme-dark');
+    if (themeName === 'light') {
+      root.classList.add('theme-light');
+    } else if (themeName === 'dark') {
+      root.classList.add('theme-dark');
+    }
+  };
+
+  const cycleTheme = () => {
+    let nextTheme = 'system';
+    if (theme === 'system') nextTheme = 'light';
+    else if (theme === 'light') nextTheme = 'dark';
+    else if (theme === 'dark') nextTheme = 'system';
+    
+    setTheme(nextTheme);
+    localStorage.setItem('survey_theme', nextTheme);
+    applyTheme(nextTheme);
+  };
+
+  // 1. Cargar configuración, caché y tema desde localStorage al iniciar
   useEffect(() => {
+    const savedTheme = localStorage.getItem('survey_theme') || 'system';
+    setTheme(savedTheme);
+    applyTheme(savedTheme);
+
     const savedConfigStr = localStorage.getItem('survey_config');
     const cachedDataStr = localStorage.getItem('survey_cache_data');
     const cachedTimestampStr = localStorage.getItem('survey_cache_timestamp');
@@ -157,6 +184,17 @@ export default function App() {
               Modo Demostración (Datos Mock)
             </span>
           )}
+          
+          <button 
+            className="btn btn-secondary btn-icon"
+            onClick={cycleTheme}
+            title={`Tema: ${theme === 'system' ? 'Sistema' : theme === 'light' ? 'Claro' : 'Oscuro'}`}
+            style={{ width: '36px', height: '36px', borderRadius: '50%' }}
+          >
+            {theme === 'system' && <Monitor size={16} />}
+            {theme === 'light' && <Sun size={16} />}
+            {theme === 'dark' && <Moon size={16} />}
+          </button>
           
           <button 
             className="btn btn-secondary"

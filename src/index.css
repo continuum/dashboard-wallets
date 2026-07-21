@@ -37,9 +37,31 @@
   padding: 0;
 }
 
+/* Override para forzar el modo oscuro */
+:root.theme-dark {
+  --bg-primary: #121212;
+  --bg-secondary: #1f1f1f;
+  --bg-tertiary: #2d2d2d;
+  --text-primary: #e8eaed;
+  --text-secondary: #9aa0a6;
+  --text-tertiary: #70757a;
+  --border-color: #3c4043;
+  --border-focus: #8ab4f8;
+  --accent-color: #8ab4f8;
+  --accent-hover: #aecbfa;
+  --accent-light: #29384f;
+  --danger-color: #f28b82;
+  --danger-light: #442726;
+  --success-color: #81c995;
+  --success-light: #1b3d26;
+  
+  --shadow-sm: 0 1px 3px 0 rgba(0,0,0,0.5), 0 1px 2px 0 rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 6px 0 rgba(0,0,0,0.5), 0 2px 4px 0 rgba(0,0,0,0.3);
+}
+
+/* Modo oscuro automático por sistema (solo si no se está forzando .theme-light) */
 @media (prefers-color-scheme: dark) {
-  :root {
-    /* Design Tokens - Dark Mode (Google Dark style) */
+  :root:not(.theme-light) {
     --bg-primary: #121212;
     --bg-secondary: #1f1f1f;
     --bg-tertiary: #2d2d2d;
