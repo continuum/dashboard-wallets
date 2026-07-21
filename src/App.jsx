@@ -8,6 +8,7 @@ import { aggregateSurveyData } from './utils/dataAggregator';
 import { MOCK_SURVEYS } from './utils/mockData';
 import ConfigPanel from './components/ConfigPanel';
 import Dashboard from './components/Dashboard';
+import { DEFAULT_SHEET_CONFIG } from './config';
 
 export default function App() {
   const [config, setConfig] = useState(null);
@@ -50,9 +51,17 @@ export default function App() {
     const cachedDataStr = localStorage.getItem('survey_cache_data');
     const cachedTimestampStr = localStorage.getItem('survey_cache_timestamp');
 
+    const hasDefaultConfig = DEFAULT_SHEET_CONFIG.sheets.some(s => s.url && s.url.trim() !== '');
+    let activeConfig = null;
+
     if (savedConfigStr) {
-      const savedConfig = JSON.parse(savedConfigStr);
-      setConfig(savedConfig);
+      activeConfig = JSON.parse(savedConfigStr);
+    } else if (hasDefaultConfig) {
+      activeConfig = DEFAULT_SHEET_CONFIG;
+    }
+
+    if (activeConfig) {
+      setConfig(activeConfig);
 
       if (cachedDataStr && cachedTimestampStr) {
         const parsedData = JSON.parse(cachedDataStr);
@@ -63,17 +72,17 @@ export default function App() {
         setIsUsingMocks(false);
 
         // Verificar si el caché ha expirado
-        const expiryMs = savedConfig.syncHours * 60 * 60 * 1000;
+        const expiryMs = activeConfig.syncHours * 60 * 60 * 1000;
         if (Date.now() - timestamp > expiryMs) {
           // Expirado: refrescar en segundo plano de manera asíncrona
-          triggerRefresh(savedConfig, true);
+          triggerRefresh(activeConfig, true);
         }
       } else {
         // Con configuración pero sin caché: refrescar en primer plano
-        triggerRefresh(savedConfig, false);
+        triggerRefresh(activeConfig, false);
       }
     } else {
-      // Sin configuración: Cargar datos Mock de demostración
+      // Sin configuración ni valores por defecto: Cargar datos Mock de demostración
       const aggregatedMocks = aggregateSurveyData(MOCK_SURVEYS);
       setData(aggregatedMocks);
       setLastUpdated(Date.now());
@@ -140,16 +149,22 @@ export default function App() {
 
   // 4. Volver a datos Mock / Restablecer configuración
   const handleResetConfig = () => {
-    if (window.confirm('¿Estás seguro de que deseas eliminar la configuración de tus encuestas? Se volverá a mostrar la demostración con datos de prueba.')) {
+    if (window.confirm('¿Estás seguro de que deseas eliminar la configuración personalizada? Se volverá a cargar la configuración por defecto de la aplicación.')) {
       localStorage.removeItem('survey_config');
       localStorage.removeItem('survey_cache_data');
       localStorage.removeItem('survey_cache_timestamp');
       
-      setConfig(null);
-      const aggregatedMocks = aggregateSurveyData(MOCK_SURVEYS);
-      setData(aggregatedMocks);
-      setLastUpdated(Date.now());
-      setIsUsingMocks(true);
+      const hasDefaultConfig = DEFAULT_SHEET_CONFIG.sheets.some(s => s.url && s.url.trim() !== '');
+      if (hasDefaultConfig) {
+        setConfig(DEFAULT_SHEET_CONFIG);
+        triggerRefresh(DEFAULT_SHEET_CONFIG, false);
+      } else {
+        setConfig(null);
+        const aggregatedMocks = aggregateSurveyData(MOCK_SURVEYS);
+        setData(aggregatedMocks);
+        setLastUpdated(Date.now());
+        setIsUsingMocks(true);
+      }
       setError(null);
       setShowConfig(false);
     }
