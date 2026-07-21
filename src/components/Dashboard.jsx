@@ -11,6 +11,19 @@ import {
 const COLORS_LIGHT = ['#1a73e8', '#12b5cb', '#ab47bc', '#34a853', '#fbbc05', '#e91e63', '#ff5722', '#607d8b'];
 const COLORS_DARK = ['#8ab4f8', '#78d9ec', '#c58af9', '#81c995', '#fdd663', '#f48fb1', '#ffab91', '#b0bec5'];
 
+const JTBD_DETAILS = {
+  'Universalidad': 'Pagar desde mi celular en todos los comercios, en cualquier momento, sin fricciones y con las mismas condiciones que las tarjetas.',
+  'Seguridad': 'Sentirme seguro y confiado al pagar, con la certeza de que no seré estafado y que mis datos personales están protegidos.',
+  'Control': 'Tener control sobre la manera en que hago mis pagos para ajustarlos a mis necesidades y consideraciones del momento.',
+  'Retribución': 'Ser reconocido por los comercios y acceder a ofertas, descuentos y beneficios especiales por mi uso continuo.',
+  'Trazabilidad': 'Tener trazabilidad y evidencia de cualquier pago hecho, por ejemplo, guardando la boleta digital del comercio.',
+  'Rentabilidad del saldo': 'Hacer que mi dinero guardado esté en movimiento generando intereses o ganancias de manera simple y automática.',
+  'Gestión de presupuesto': 'Capacidad de gestionar mi dinero para crear un presupuesto realista y planificar el ahorro de forma sencilla.',
+  'Acceso para terceros': 'Proveer a un tercero (como hijos) un método de pago seguro y controlado sin requisitos bancarios complejos.',
+  'Servicios cotidianos': 'Acceder a servicios diarios de transporte y alimentación simplificados, sin tener que manejar múltiples aplicaciones.',
+  'Diversidad de pagos': 'Contar con métodos de pago alternativos (pagar directo de la cuenta, cuotas sin tarjeta de crédito, etc.).'
+};
+
 function WalletBrandBadge({ name }) {
   const lower = name.toLowerCase().trim();
   
@@ -337,7 +350,7 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
                 {/* Columna Izquierda: Consolidado */}
                 <div className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '24px 32px', position: 'relative', minHeight: '180px' }}>
                   <span style={{ fontSize: '13px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.8px', fontWeight: 500 }}>
-                    Respuestas Consolidadas
+                    Respuestas Totales
                   </span>
                   <span style={{ fontSize: '64px', fontWeight: 200, color: 'var(--accent-color)', marginTop: '8px', lineHeight: 1 }}>
                     {data.totalResponses}
@@ -347,14 +360,34 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
 
                 {/* Columna Derecha: Individuales apiladas */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', justifyContent: 'space-between' }}>
-                  {data.rawSurveys.map((survey, index) => (
-                    <div className="card" key={survey.name} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 20px', minHeight: '52px', margin: 0 }}>
-                      <SurveyBrandBadge name={survey.name} />
-                      <span style={{ fontSize: '20px', fontWeight: 500, color: 'var(--text-primary)' }}>
-                        {survey.rows.length}
-                      </span>
-                    </div>
-                  ))}
+                  {data.rawSurveys.map((survey, index) => {
+                    const getSurveyLabel = (name) => {
+                      const lower = name.toLowerCase();
+                      if (lower.includes('continuum')) return 'Respuestas Continuum';
+                      if (lower.includes('chócale') || lower.includes('chocale')) return 'Respuestas Chócale';
+                      if (lower.includes('chilepay') || lower.includes('chile pay')) return 'Respuestas ChilePay';
+                      return `Respuestas ${name}`;
+                    };
+                    return (
+                      <div className="card" key={survey.name} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '12px 20px', minHeight: '52px', margin: 0, position: 'relative' }}>
+                        <span style={{ fontSize: '11px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 500 }}>
+                          {getSurveyLabel(survey.name)}
+                        </span>
+                        <span style={{ fontSize: '20px', fontWeight: 600, color: 'var(--text-primary)', marginTop: '4px' }}>
+                          {survey.rows.length}
+                        </span>
+                        <div style={{
+                          position: 'absolute',
+                          left: 0,
+                          top: 0,
+                          bottom: 0,
+                          width: '4px',
+                          backgroundColor: survey.name.toLowerCase().includes('continuum') ? '#00d2ff' : survey.name.toLowerCase().includes('chócale') || survey.name.toLowerCase().includes('chocale') ? '#f25c05' : '#002855',
+                          borderRadius: '4px 0 0 4px'
+                        }} />
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -377,26 +410,26 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
                           <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
                           <XAxis 
                             type="number" 
-                            dataKey="difficulty" 
-                            name="Dificultad" 
-                            domain={[0, 10]} 
-                            stroke="var(--text-secondary)"
-                            tick={{ fontSize: 10 }}
-                            label={{ value: 'Dificultad de Resolver (→)', position: 'bottom', offset: 0, style: { fontSize: 11, fill: 'var(--text-secondary)' } }}
-                          />
-                          <YAxis 
-                            type="number" 
                             dataKey="importance" 
                             name="Importancia" 
                             domain={[0, 10]} 
                             stroke="var(--text-secondary)"
                             tick={{ fontSize: 10 }}
-                            label={{ value: 'Importancia del Job (↑)', angle: -90, position: 'insideLeft', offset: -10, style: { fontSize: 11, fill: 'var(--text-secondary)', textAnchor: 'middle' } }}
+                            label={{ value: 'Importancia del Job para el usuario (→)', position: 'bottom', offset: 0, style: { fontSize: 11, fill: 'var(--text-secondary)' } }}
+                          />
+                          <YAxis 
+                            type="number" 
+                            dataKey="difficulty" 
+                            name="Dificultad" 
+                            domain={[0, 10]} 
+                            stroke="var(--text-secondary)"
+                            tick={{ fontSize: 10 }}
+                            label={{ value: 'Dificultad para lograr el Job (↑)', angle: -90, position: 'insideLeft', offset: -10, style: { fontSize: 11, fill: 'var(--text-secondary)', textAnchor: 'middle' } }}
                           />
                           
-                          {/* Líneas de cuadrantes (Cortan en X=5 y Y=7.5) */}
-                          <ReferenceLine x={5} stroke="var(--border-color)" strokeDasharray="3 3" />
-                          <ReferenceLine y={7.5} stroke="var(--border-color)" strokeDasharray="3 3" />
+                          {/* Líneas de cuadrantes (Cortan en X=7.5 y Y=5) */}
+                          <ReferenceLine x={7.5} stroke="var(--border-color)" strokeDasharray="3 3" />
+                          <ReferenceLine y={5} stroke="var(--border-color)" strokeDasharray="3 3" />
                           
                           <Tooltip 
                             cursor={{ strokeDasharray: '3 3' }} 
@@ -416,7 +449,7 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
                     
                     <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: '8px', fontSize: '10px', color: 'var(--text-tertiary)', borderTop: '1px solid var(--border-color)', paddingTop: '10px' }}>
                       <span>Sup-Derecha: Oportunidades Clave (Alta Importancia / Alta Dificultad)</span>
-                      <span>Sup-Izquierda: Básicos (Alta Importancia / Baja Dificultad)</span>
+                      <span>Inf-Derecha: Básicos (Alta Importancia / Baja Dificultad)</span>
                     </div>
                   </div>
 
@@ -430,7 +463,11 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', overflowY: 'auto', maxHeight: '350px' }}>
                       {data.jtbdOpportunityData.map((job, idx) => (
-                        <div key={job.key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 8px', borderRadius: 'var(--radius-sm)', backgroundColor: idx < 3 ? 'var(--accent-light)' : 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}>
+                        <div 
+                          key={job.key} 
+                          title={JTBD_DETAILS[job.name.trim()] || ''}
+                          style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 8px', borderRadius: 'var(--radius-sm)', backgroundColor: idx < 3 ? 'var(--accent-light)' : 'var(--bg-secondary)', border: '1px solid var(--border-color)', cursor: 'help' }}
+                        >
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', maxWidth: '75%' }}>
                             <span style={{ fontSize: '12px', fontWeight: idx < 3 ? 500 : 400, color: 'var(--text-primary)', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
                               {idx + 1}. {job.name}
@@ -480,18 +517,21 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
                     title="Género" 
                     dataObj={data.demographics.gender} 
                     total={data.totalResponses} 
+                    limit={5}
                   />
 
                   <DemographicsBarList 
                     title="Situación Laboral" 
                     dataObj={data.demographics.employment} 
                     total={data.totalResponses} 
+                    limit={5}
                   />
 
                   <DemographicsBarList 
                     title="Gestión de Finanzas" 
                     dataObj={data.demographics.budget} 
                     total={data.totalResponses} 
+                    limit={5}
                   />
                 </div>
               </div>

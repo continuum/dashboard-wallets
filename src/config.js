@@ -27,4 +27,4 @@ export const DEFAULT_SHEET_CONFIG = {
 
 // Contraseña para proteger el acceso al panel de "Ajustes" en el dashboard.
 // Nota: Dado que es un sitio estático, se valida en el cliente.
-export const CONFIG_PASSWORD = 'continuum2026';
+export const CONFIG_PASSWORD = 'continuum_billeteras_2026';

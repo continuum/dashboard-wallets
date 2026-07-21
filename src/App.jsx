@@ -247,9 +247,13 @@ export default function App() {
       
       {/* App Header */}
       <header className="app-header">
-        <div className="header-logo">
-          <FileSpreadsheet size={22} />
-          <span className="header-title">Survey Dashboard</span>
+        <div className="header-logo" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ fontSize: '20px', fontWeight: 600, color: 'var(--text-primary)', display: 'flex', alignItems: 'center' }}>
+            <span style={{ color: '#00d2ff', fontWeight: 700, marginRight: '2px' }}>/</span>continuum
+          </span>
+          <span style={{ fontSize: '13px', color: 'var(--text-secondary)', borderLeft: '1px solid var(--border-color)', paddingLeft: '8px', marginLeft: '4px', fontWeight: 400 }}>
+            Estudio Billeteras 2026
+          </span>
         </div>
         <div className="header-actions">
           <button 
@@ -375,7 +379,7 @@ export default function App() {
 
       {/* Clean, minimalist footer */}
       <footer style={{ borderTop: '1px solid var(--border-color)', padding: '16px', textAlign: 'center', color: 'var(--text-tertiary)', fontSize: '12px', marginTop: 'auto' }}>
-        Survey Dashboard &copy; {new Date().getFullYear()} &bull; Desarrollado para Google Sheets
+        © 2026 Continuum Dashboard • Desarrollado para Google Sheets
       </footer>
 
       {/* Modal de prompt de contraseña */}
