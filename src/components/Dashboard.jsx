@@ -5,9 +5,10 @@ import {
   PieChart as RechartsPieChart, Pie, Cell, LabelList
 } from 'recharts';
 import { 
-  Users, BarChart3, Database, Calendar, 
-  Star, ChevronDown, ChevronUp, AlertCircle, Info, PieChart
-} from 'lucide-react';
+  Group, GraphUp as IconoirBarChart, Database, Calendar, 
+  Star, NavArrowDown, NavArrowUp, WarningCircle, InfoCircle, StatsReport,
+  Maximize, Xmark
+} from 'iconoir-react';
 
 import logoMercadoPago from '../assets/mercado-pago.png';
 import logoAppleWallet from '../assets/apple-wallet.png';
@@ -123,28 +124,37 @@ const CustomJTBDTooltip = ({ active, payload }) => {
 
 
 // Componente premium para renderizar el gráfico de barras verticales de Billeteras Preferidas con Logos
-function PreferredWalletsCard({ dataObj, total }) {
+function PreferredWalletsCard({ dataObj, total, isExpanded = false, onExpand = null }) {
   if (!dataObj) return null;
 
-  // Definir las 5 billeteras clave y sus logos correspondientes
-  const wallets = [
-    { name: 'Mercado Pago', apiKey: 'Mercado Pago', logo: logoMercadoPago },
-    { name: 'Apple Pay', apiKey: 'Apple Pay', logo: logoAppleWallet },
-    { name: 'Copec Pay', apiKey: 'Copec Pay', logo: logoCopec },
-    { name: 'Google Pay', apiKey: 'Google Pay', logo: logoGoogleWallet },
-    { name: 'Mi Banco', apiKey: 'La aplicación de mi banco', logo: logoMiBanco }
-  ];
+  // Obtener todas las billeteras presentes en dataObj ordenadas por frecuencia
+  const allSortedWallets = Object.keys(dataObj)
+    .map(name => ({ name, count: dataObj[name] }))
+    .sort((a, b) => b.count - a.count);
 
-  // Mapear los conteos y porcentajes desde el objeto de datos
-  const items = wallets.map(w => {
-    const count = dataObj[w.apiKey] || 0;
-    const percentage = total > 0 ? parseFloat(((count / total) * 100).toFixed(1)) : 0;
+  const displayLimit = isExpanded ? 7 : 5;
+  const items = allSortedWallets.slice(0, displayLimit).map(item => {
+    let logo = null;
+    let displayName = item.name;
+    
+    const lower = item.name.toLowerCase();
+    if (lower.includes('mercado') && lower.includes('pago')) logo = logoMercadoPago;
+    else if (lower.includes('apple') && lower.includes('pay')) logo = logoAppleWallet;
+    else if (lower.includes('copec')) logo = logoCopec;
+    else if (lower.includes('google') && lower.includes('pay')) logo = logoGoogleWallet;
+    else if (lower.includes('mi banco') || lower.includes('aplicación de mi banco')) {
+      logo = logoMiBanco;
+      displayName = 'Mi Banco';
+    }
+    
     return {
-      ...w,
-      count,
-      percentage
+      name: displayName,
+      originalName: item.name,
+      logo,
+      count: item.count,
+      percentage: total > 0 ? parseFloat(((item.count / total) * 100).toFixed(1)) : 0
     };
-  }).sort((a, b) => b.count - a.count); // Ordenar por frecuencia
+  });
 
   const renderCustomXAxisTick = (props) => {
     const { x, y, payload } = props;
@@ -170,18 +180,33 @@ function PreferredWalletsCard({ dataObj, total }) {
       );
     }
     return (
-      <text x={x} y={y + 14} fill="var(--text-secondary)" textAnchor="middle" fontSize={10}>
-        {payload.value}
-      </text>
+      <g transform={`translate(${x - 14},${y})`}>
+        <circle cx="14" cy="20" r="13" fill="var(--accent-color)" opacity={0.15} />
+        <text x="14" y="24" fill="var(--accent-color)" textAnchor="middle" fontSize={10} fontWeight="bold">
+          {payload.value.charAt(0).toUpperCase()}
+        </text>
+      </g>
     );
   };
 
   return (
-    <div className="card" style={{ padding: '16px', display: 'flex', flexDirection: 'column' }}>
-      <h3 style={{ fontSize: '14px', fontWeight: 700, marginBottom: '12px', color: 'var(--text-primary)', borderBottom: '1px solid var(--border-color)', paddingBottom: '6px' }}>
-        Billeteras Preferidas
-      </h3>
-      <div style={{ flex: 1, minHeight: '180px', width: '100%', marginTop: '10px' }}>
+    <div className="card" style={{ padding: '16px', display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '6px', marginBottom: '12px' }}>
+        <h3 style={{ fontSize: '14px', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>
+          Billeteras Preferidas
+        </h3>
+        {!isExpanded && onExpand && (
+          <button 
+            onClick={onExpand}
+            style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', borderRadius: '4px' }}
+            title="Ampliar gráfico"
+            className="expand-btn-hover"
+          >
+            <Maximize size={16} />
+          </button>
+        )}
+      </div>
+      <div style={{ flex: 1, minHeight: isExpanded ? '260px' : '180px', width: '100%', marginTop: '10px' }}>
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={items} margin={{ top: 20, right: 10, bottom: 35, left: 10 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-color)" opacity={0.3} />
@@ -207,7 +232,7 @@ function PreferredWalletsCard({ dataObj, total }) {
               dataKey="percentage" 
               fill="var(--accent-color)" 
               radius={[6, 6, 0, 0]}
-              maxBarSize={36}
+              maxBarSize={isExpanded ? 46 : 36}
             >
               <LabelList 
                 dataKey="percentage" 
@@ -224,7 +249,7 @@ function PreferredWalletsCard({ dataObj, total }) {
 }
 
 // Componente premium para renderizar gráficos de torta (PieChart) para perfiles demográficos
-function DemographicsPieChart({ title, dataObj, total, limit = null }) {
+function DemographicsPieChart({ title, dataObj, total, isExpanded = false, onExpand = null }) {
   if (!dataObj || Object.keys(dataObj).length === 0) {
     return (
       <div className="card" style={{ padding: '16px' }}>
@@ -239,15 +264,12 @@ function DemographicsPieChart({ title, dataObj, total, limit = null }) {
     .map(name => ({ name, count: dataObj[name] }))
     .sort((a, b) => b.count - a.count);
 
-  if (limit) {
-    rawItems = rawItems.slice(0, limit);
-  }
-
-  // Si hay más de 4 elementos, agrupar el resto como "Otros" para mantener el Pie limpio
+  // Si está expandido mostramos hasta 6 principales + otros (7 total), si no, 3 principales + otros (4 total)
+  const maxSlices = isExpanded ? 6 : 3;
   let items = [];
-  if (rawItems.length > 4) {
-    items = rawItems.slice(0, 3);
-    const otherCount = rawItems.slice(3).reduce((acc, curr) => acc + curr.count, 0);
+  if (rawItems.length > (maxSlices + 1)) {
+    items = rawItems.slice(0, maxSlices);
+    const otherCount = rawItems.slice(maxSlices).reduce((acc, curr) => acc + curr.count, 0);
     if (otherCount > 0) {
       items.push({ name: 'Otros', count: otherCount });
     }
@@ -261,31 +283,45 @@ function DemographicsPieChart({ title, dataObj, total, limit = null }) {
     percentage: total > 0 ? parseFloat(((item.count / total) * 100).toFixed(1)) : 0
   }));
 
-  // Paleta de colores premium y diferenciados (Tailwind colors)
-  // Azul, Violeta, Esmeralda, Rosa/Naranja
+  // Paleta de colores premium ampliada para soportar hasta 7 categorías + Otros
   const PIE_COLORS = [
     '#3b82f6', // Blue
     '#8b5cf6', // Violet
     '#10b981', // Emerald
     '#f43f5e', // Rose
-    '#f59e0b'  // Amber
+    '#f59e0b', // Amber
+    '#06b6d4', // Cyan
+    '#ec4899', // Pink
+    '#64748b'  // Slate / Otros
   ];
 
   return (
-    <div className="card" style={{ padding: '16px', display: 'flex', flexDirection: 'column' }}>
-      <h3 style={{ fontSize: '14px', fontWeight: 700, marginBottom: '12px', color: 'var(--text-primary)', borderBottom: '1px solid var(--border-color)', paddingBottom: '6px' }}>
-        {title}
-      </h3>
-      <div style={{ display: 'flex', flex: 1, alignItems: 'center', justifyContent: 'center', minHeight: '180px', position: 'relative' }}>
-        <div style={{ width: '130px', height: '130px' }}>
+    <div className="card" style={{ padding: '16px', display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '6px', marginBottom: '12px' }}>
+        <h3 style={{ fontSize: '14px', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>
+          {title}
+        </h3>
+        {!isExpanded && onExpand && (
+          <button 
+            onClick={onExpand}
+            style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', borderRadius: '4px' }}
+            title="Ampliar gráfico"
+            className="expand-btn-hover"
+          >
+            <Maximize size={16} />
+          </button>
+        )}
+      </div>
+      <div style={{ display: 'flex', flex: 1, alignItems: 'center', justifyContent: 'center', minHeight: isExpanded ? '260px' : '180px', position: 'relative' }}>
+        <div style={{ width: isExpanded ? '170px' : '130px', height: isExpanded ? '170px' : '130px' }}>
           <ResponsiveContainer width="100%" height="100%">
             <RechartsPieChart>
               <Pie
                 data={chartData}
                 cx="50%"
                 cy="50%"
-                innerRadius={36}
-                outerRadius={55}
+                innerRadius={isExpanded ? 46 : 36}
+                outerRadius={isExpanded ? 75 : 55}
                 paddingAngle={3}
                 dataKey="value"
               >
@@ -309,9 +345,9 @@ function DemographicsPieChart({ title, dataObj, total, limit = null }) {
         </div>
         
         {/* Leyendas compactas a la derecha */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginLeft: '12px', flex: 1, minWidth: 0 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: isExpanded ? '10px' : '8px', marginLeft: isExpanded ? '24px' : '12px', flex: 1, minWidth: 0 }}>
           {chartData.map((entry, index) => (
-            <div key={entry.name} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', minWidth: 0 }}>
+            <div key={entry.name} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: isExpanded ? '12px' : '11px', minWidth: 0 }}>
               <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: PIE_COLORS[index % PIE_COLORS.length], flexShrink: 0 }} />
               <span 
                 style={{ 
@@ -384,6 +420,7 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
   const [activeTab, setActiveTab] = useState('summary'); // 'summary', 'breakdown'
   const [selectedSource, setSelectedSource] = useState('consolidated');
   const [expandedQuestions, setExpandedQuestions] = useState({});
+  const [expandedChart, setExpandedChart] = useState(null);
   
   // Determinar si el modo oscuro está activo basado en el prop theme y la preferencia del sistema
   const [systemDark, setSystemDark] = useState(
@@ -576,7 +613,7 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
                     onClick={() => toggleExpand(uniqueId)}
                     style={{ alignSelf: 'flex-start', padding: '4px 10px', fontSize: '11px', height: 'auto' }}
                   >
-                    {expandedQuestions[uniqueId] ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                    {expandedQuestions[uniqueId] ? <NavArrowUp size={12} /> : <NavArrowDown size={12} />}
                     {expandedQuestions[uniqueId] ? 'Ocultar comentarios' : `Ver comentarios (${surveyComments.length})`}
                   </button>
 
@@ -610,7 +647,7 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
       <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '16px', borderBottom: '1px solid var(--border-color)', paddingBottom: '16px' }}>
         <div>
           <h1 style={{ fontSize: '22px', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <BarChart3 style={{ color: 'var(--accent-color)' }} />
+            <IconoirBarChart style={{ color: 'var(--accent-color)' }} />
             Estudio Billeteras Digitales 2026
           </h1>
           <p style={{ fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
@@ -649,7 +686,7 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
 
       {!hasResponses ? (
         <div className="card" style={{ textAlign: 'center', padding: '48px 24px' }}>
-          <AlertCircle size={48} style={{ color: 'var(--text-tertiary)', margin: '0 auto 16px auto' }} />
+          <WarningCircle size={48} style={{ color: 'var(--text-tertiary)', margin: '0 auto 16px auto' }} />
           <h2>No hay datos cargados</h2>
           <p style={{ maxWidth: '400px', margin: '8px auto 0 auto' }}>
             El caché está vacío y no hay datos configurados. 
@@ -685,7 +722,7 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
                   <span style={{ fontSize: '64px', fontWeight: 200, color: 'var(--accent-color)', marginTop: '8px', lineHeight: 1 }}>
                     {data.totalResponses}
                   </span>
-                  <Users size={32} style={{ position: 'absolute', right: '32px', top: '32px', color: 'var(--text-tertiary)', opacity: 0.3 }} />
+                  <Group size={32} style={{ position: 'absolute', right: '32px', top: '32px', color: 'var(--text-tertiary)', opacity: 0.3 }} />
                 </div>
 
                 {/* Columna Derecha: Individuales apiladas */}
@@ -873,7 +910,7 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
                 </div>
               ) : (
                 <div className="card" style={{ display: 'flex', flexDirection: 'row', gap: '16px', alignItems: 'center', padding: '16px 20px', backgroundColor: 'var(--accent-light)', borderColor: 'var(--accent-color)' }}>
-                  <Info size={20} style={{ color: 'var(--accent-color)', flexShrink: 0 }} />
+                  <InfoCircle size={20} style={{ color: 'var(--accent-color)', flexShrink: 0 }} />
                   <div>
                     <h3 style={{ fontSize: '14px', fontWeight: 500, color: 'var(--accent-color)' }}>Evaluación de Oportunidades JTBD</h3>
                     <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '2px', lineHeight: '1.4' }}>
@@ -886,7 +923,7 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
               {/* Sección B: Perfil de la Muestra (Consolidado de las 3 encuestas) */}
               <div>
                 <h2 style={{ fontSize: '16px', fontWeight: 500, marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)' }}>
-                  <PieChart size={18} />
+                  <StatsReport size={18} />
                   Perfil Consolidado de la Muestra (Encuestados 2026)
                 </h2>
                 
@@ -894,27 +931,28 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
                   <PreferredWalletsCard 
                     dataObj={data.demographics.wallets} 
                     total={data.totalResponses} 
+                    onExpand={() => setExpandedChart({ type: 'wallets', title: 'Billeteras Preferidas', dataObj: data.demographics.wallets })}
                   />
                   
                   <DemographicsPieChart 
                     title="Género" 
                     dataObj={data.demographics.gender} 
                     total={data.totalResponses} 
-                    limit={5}
+                    onExpand={() => setExpandedChart({ type: 'gender', title: 'Género', dataObj: data.demographics.gender })}
                   />
 
                   <DemographicsPieChart 
                     title="Situación Laboral" 
                     dataObj={data.demographics.employment} 
                     total={data.totalResponses} 
-                    limit={5}
+                    onExpand={() => setExpandedChart({ type: 'employment', title: 'Situación Laboral', dataObj: data.demographics.employment })}
                   />
 
                   <DemographicsPieChart 
                     title="Gestión de Finanzas" 
                     dataObj={data.demographics.budget} 
                     total={data.totalResponses} 
-                    limit={5}
+                    onExpand={() => setExpandedChart({ type: 'budget', title: 'Gestión de Finanzas', dataObj: data.demographics.budget })}
                   />
                 </div>
               </div>
@@ -1046,6 +1084,84 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
             );
           })()}
         </>
+      )}
+
+      {/* Modal para ampliar gráficos demográficos */}
+      {expandedChart && (
+        <div 
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(12, 16, 28, 0.75)',
+            backdropFilter: 'blur(16px)',
+            zIndex: 1000,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '16px'
+          }}
+          onClick={() => setExpandedChart(null)}
+        >
+          <div 
+            className="card" 
+            style={{
+              width: '100%',
+              maxWidth: '640px',
+              padding: '24px 28px',
+              position: 'relative',
+              backgroundColor: 'var(--card-bg)',
+              boxShadow: '0 20px 25px -5px rgba(0,0,0,0.3), 0 10px 10px -5px rgba(0,0,0,0.3)',
+              borderRadius: '16px',
+              border: '1px solid var(--border-color)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '12px'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Botón de cerrar */}
+            <button 
+              onClick={() => setExpandedChart(null)}
+              style={{
+                position: 'absolute',
+                top: '16px',
+                right: '16px',
+                background: 'none',
+                border: 'none',
+                color: 'var(--text-secondary)',
+                cursor: 'pointer',
+                padding: '6px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: '50%',
+                transition: 'background-color 0.2s'
+              }}
+              className="expand-btn-hover"
+              title="Cerrar modal"
+            >
+              <Xmark size={18} />
+            </button>
+
+            {/* Gráfico expandido */}
+            <div style={{ width: '100%', display: 'flex', flexDirection: 'column', flex: 1 }}>
+              {expandedChart.type === 'wallets' ? (
+                <PreferredWalletsCard 
+                  dataObj={expandedChart.dataObj}
+                  total={data.totalResponses}
+                  isExpanded={true}
+                />
+              ) : (
+                <DemographicsPieChart 
+                  title={expandedChart.title}
+                  dataObj={expandedChart.dataObj}
+                  total={data.totalResponses}
+                  isExpanded={true}
+                />
+              )}
+            </div>
+          </div>
+        </div>
       )}
 
     </div>

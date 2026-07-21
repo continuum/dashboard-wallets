@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Settings, HelpCircle, Save, FileSpreadsheet } from 'lucide-react';
+import { Settings, HelpCircle, FloppyDisk, Page } from 'iconoir-react';
 import { extractSpreadsheetId } from '../utils/sheetFetcher';
 
 export default function ConfigPanel({ currentConfig, onSave, onCancel, showCancel }) {
@@ -139,7 +139,7 @@ export default function ConfigPanel({ currentConfig, onSave, onCancel, showCance
             </button>
           )}
           <button type="submit" className="btn btn-primary">
-            <Save size={16} />
+            <FloppyDisk size={16} />
             Guardar Configuración
           </button>
         </div>

@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
-  Settings, RefreshCw, AlertTriangle,
-  Sun, Moon, Monitor
-} from 'lucide-react';
+  Settings, Refresh, WarningTriangle,
+  SunLight, HalfMoon, Computer
+} from 'iconoir-react';
 import { fetchSheetData } from './utils/sheetFetcher';
 import { aggregateSurveyData } from './utils/dataAggregator';
 import ConfigPanel from './components/ConfigPanel';
@@ -276,9 +276,9 @@ export default function App() {
             title={`Tema: ${theme === 'system' ? 'Sistema' : theme === 'light' ? 'Claro' : 'Oscuro'}`}
             style={{ width: '36px', height: '36px', borderRadius: '50%' }}
           >
-            {theme === 'system' && <Monitor size={16} />}
-            {theme === 'light' && <Sun size={16} />}
-            {theme === 'dark' && <Moon size={16} />}
+            {theme === 'system' && <Computer size={16} />}
+            {theme === 'light' && <SunLight size={16} />}
+            {theme === 'dark' && <HalfMoon size={16} />}
           </button>
           
           <button 
@@ -308,7 +308,7 @@ export default function App() {
         {error && (
           <div className="alert alert-danger" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <AlertTriangle size={16} />
+              <WarningTriangle size={16} />
               <strong>Error de Sincronización</strong>
             </div>
             <p style={{ color: 'inherit', fontSize: '13px', margin: 0 }}>{error}</p>
@@ -332,7 +332,7 @@ export default function App() {
         ) : (
           !config ? (
             <div className="card" style={{ maxWidth: '540px', margin: '40px auto', width: '100%', textAlign: 'center', padding: '32px 24px', display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center' }}>
-              <AlertTriangle size={48} style={{ color: 'var(--accent-color)' }} />
+              <WarningTriangle size={48} style={{ color: 'var(--accent-color)' }} />
               <div>
                 <h2 style={{ fontSize: '18px', fontWeight: 500 }}>Estudio Billeteras Digitales 2026</h2>
                 <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '8px', lineHeight: '1.6' }}>
@@ -350,7 +350,7 @@ export default function App() {
           ) : (
             isRefreshing && !data ? (
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '200px', gap: '16px' }}>
-                <RefreshCw size={32} className="animate-spin" style={{ color: 'var(--accent-color)' }} />
+                <Refresh size={32} className="animate-spin" style={{ color: 'var(--accent-color)' }} />
                 <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Cargando datos de las encuestas...</p>
               </div>
             ) : (
@@ -364,7 +364,7 @@ export default function App() {
                 />
               ) : (
                 <div className="card" style={{ maxWidth: '540px', margin: '40px auto', width: '100%', textAlign: 'center', padding: '32px 24px', display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center' }}>
-                  <AlertTriangle size={48} style={{ color: 'var(--danger-color)' }} />
+                  <WarningTriangle size={48} style={{ color: 'var(--danger-color)' }} />
                   <div>
                     <h2 style={{ fontSize: '18px', fontWeight: 500 }}>No se pudieron cargar los datos</h2>
                     <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '8px', lineHeight: '1.6' }}>
