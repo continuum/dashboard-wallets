@@ -119,7 +119,7 @@ body {
 /* Typography styles with light weight weights */
 h1 {
   font-size: 24px;
-  font-weight: 400;
+  font-weight: 800;
   color: var(--text-primary);
   letter-spacing: -0.2px;
 }
@@ -312,6 +312,47 @@ p {
 }
 
 .btn-secondary:active {
+  transform: translateY(-0.5px);
+}
+
+/* Custom override for header buttons to lower their hierarchy */
+.app-header .btn-secondary {
+  border-color: var(--border-color);
+  color: var(--text-secondary);
+  border-width: 1px;
+  background-color: transparent;
+}
+
+.app-header .btn-secondary:hover {
+  background-color: var(--accent-light);
+  border-color: var(--accent-color);
+  color: var(--accent-color);
+  transform: translateY(-1.5px);
+}
+
+/* Custom override for Sincronizar button to fill blue with white text on hover */
+.btn-sync:hover {
+  background-color: var(--accent-color) !important;
+  border-color: var(--accent-hover) !important;
+  color: #ffffff !important;
+}
+
+/* Rediseño para botón de peligro (Restablecer) */
+.btn-danger {
+  background-color: transparent;
+  border-color: var(--border-color);
+  color: var(--text-secondary);
+  border-width: 1px;
+}
+
+.btn-danger:hover {
+  background-color: var(--danger-light);
+  border-color: var(--danger-color);
+  color: var(--danger-color);
+  transform: translateY(-1.5px);
+}
+
+.btn-danger:active {
   transform: translateY(-0.5px);
 }
 

@@ -292,9 +292,9 @@ export default function App() {
           
           {config && (
             <button 
-              className="btn btn-secondary"
+              className="btn btn-danger"
               onClick={handleResetConfig}
-              style={{ color: 'var(--danger-color)', borderColor: 'var(--danger-color)', height: '36px', padding: '0 12px' }}
+              style={{ height: '36px', padding: '0 12px' }}
             >
               Restablecer
             </button>

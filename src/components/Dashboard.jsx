@@ -460,7 +460,7 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
         </div>
         <div style={{ display: 'flex', gap: '12px' }}>
           <button 
-            className="btn btn-secondary" 
+            className="btn btn-secondary btn-sync" 
             onClick={onForceRefresh} 
             disabled={isRefreshing}
           >
