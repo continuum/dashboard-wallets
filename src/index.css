@@ -441,3 +441,26 @@ p {
   background-color: var(--accent-light);
   color: var(--accent-color);
 }
+
+/* JTBD Opportunity Layout */
+.jtbd-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+}
+
+@media (max-width: 900px) {
+  .jtbd-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
+/* Hide scrollbar class */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}

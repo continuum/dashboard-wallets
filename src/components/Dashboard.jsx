@@ -4,7 +4,7 @@ import {
   ScatterChart, Scatter, ReferenceLine, Cell, LabelList
 } from 'recharts';
 import { 
-  FileText, Users, BarChart3, Database, Calendar, CheckCircle2, 
+  Users, BarChart3, Database, Calendar, 
   Star, ChevronDown, ChevronUp, AlertCircle, Info, PieChart
 } from 'lucide-react';
 
@@ -578,97 +578,97 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
 
               {/* Sección A: Mapa de Oportunidad de Jobs to be Done (JTBD) */}
               {hasJtbdData ? (
-                <div className="grid-cols-3" style={{ gridTemplateColumns: '2fr 1fr' }}>
-                  
-                  {/* Gráfico de Dispersión / Scatter Plot */}
-                  <div className="card">
-                    <div className="card-header" style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '8px' }}>
-                      <div>
-                        <h2>Mapa de Oportunidades JTBD (2026)</h2>
-                        <p style={{ fontSize: '12px', marginTop: '2px' }}>Importancia vs Dificultad para las 10 metas financieras de los chilenos</p>
-                      </div>
-                    </div>
-                    
-                    <div style={{ width: '100%', height: '360px', marginTop: '8px' }}>
-                      <ResponsiveContainer width="100%" height="100%">
-                        <ScatterChart margin={{ top: 20, right: 30, bottom: 20, left: -20 }}>
-                          <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
-                          <XAxis 
-                            type="number" 
-                            dataKey="importance" 
-                            name="Importancia" 
-                            domain={[0, 10]} 
-                            stroke="var(--text-secondary)"
-                            tick={{ fontSize: 10 }}
-                            label={{ value: 'Importancia del Job para el usuario (→)', position: 'bottom', offset: 0, style: { fontSize: 11, fill: 'var(--text-secondary)' } }}
-                          />
-                          <YAxis 
-                            type="number" 
-                            dataKey="difficulty" 
-                            name="Dificultad" 
-                            domain={[0, 10]} 
-                            stroke="var(--text-secondary)"
-                            tick={{ fontSize: 10 }}
-                            label={{ value: 'Dificultad para lograr el Job (↑)', angle: -90, position: 'insideLeft', offset: -10, style: { fontSize: 11, fill: 'var(--text-secondary)', textAnchor: 'middle' } }}
-                          />
-                          
-                          {/* Líneas de cuadrantes (Cortan en X=7.5 y Y=5) */}
-                          <ReferenceLine x={7.5} stroke="var(--border-color)" strokeDasharray="3 3" />
-                          <ReferenceLine y={5} stroke="var(--border-color)" strokeDasharray="3 3" />
-                          
-                          <Tooltip 
-                            cursor={{ strokeDasharray: '3 3' }} 
-                            contentStyle={tooltipStyle}
-                            formatter={(value, name) => [value, name]}
-                          />
-                          
-                          <Scatter name="Metas Financieras" data={data.jtbdOpportunityData} fill="var(--accent-color)">
-                            {data.jtbdOpportunityData.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
-                            ))}
-                            <LabelList dataKey="name" position="top" style={{ fontSize: 9, fill: 'var(--text-primary)', fontWeight: 400 }} />
-                          </Scatter>
-                        </ScatterChart>
-                      </ResponsiveContainer>
-                    </div>
-                    
-                    <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: '8px', fontSize: '10px', color: 'var(--text-tertiary)', borderTop: '1px solid var(--border-color)', paddingTop: '10px' }}>
-                      <span>Sup-Derecha: Oportunidades Clave (Alta Importancia / Alta Dificultad)</span>
-                      <span>Inf-Derecha: Básicos (Alta Importancia / Baja Dificultad)</span>
+                <div className="card">
+                  <div className="card-header" style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '12px' }}>
+                    <div>
+                      <h2>Mapa de Oportunidades JTBD 2026</h2>
                     </div>
                   </div>
-
-                  {/* Tabla de Ranking de Oportunidad */}
-                  <div className="card">
-                    <div className="card-header" style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '8px' }}>
-                      <div>
-                        <h2>Prioridad de Oportunidad</h2>
-                        <p style={{ fontSize: '11px', marginTop: '2px' }}>Ranking de metas según dolor observado</p>
+                  
+                  <div className="jtbd-grid" style={{ marginTop: '8px' }}>
+                    {/* Gráfico de Dispersión / Scatter Plot */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                      <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: 0 }}>
+                        Importancia vs Dificultad para las 10 metas financieras de los chilenos
+                      </p>
+                      
+                      <div style={{ width: '100%', height: '360px' }}>
+                        <ResponsiveContainer width="100%" height="100%">
+                          <ScatterChart margin={{ top: 20, right: 30, bottom: 20, left: -20 }}>
+                            <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+                            <XAxis 
+                              type="number" 
+                              dataKey="importance" 
+                              name="Importancia" 
+                              domain={[0, 10]} 
+                              stroke="var(--text-secondary)"
+                              tick={{ fontSize: 10 }}
+                              label={{ value: 'Importancia del Job para el usuario (→)', position: 'bottom', offset: 0, style: { fontSize: 11, fill: 'var(--text-secondary)' } }}
+                            />
+                            <YAxis 
+                              type="number" 
+                              dataKey="difficulty" 
+                              name="Dificultad" 
+                              domain={[0, 10]} 
+                              stroke="var(--text-secondary)"
+                              tick={{ fontSize: 10 }}
+                              label={{ value: 'Dificultad para lograr el Job (↑)', angle: -90, position: 'insideLeft', offset: -10, style: { fontSize: 11, fill: 'var(--text-secondary)', textAnchor: 'middle' } }}
+                            />
+                            
+                            {/* Líneas de cuadrantes (Cortan en X=7.5 y Y=5) */}
+                            <ReferenceLine x={7.5} stroke="var(--border-color)" strokeDasharray="3 3" />
+                            <ReferenceLine y={5} stroke="var(--border-color)" strokeDasharray="3 3" />
+                            
+                            <Tooltip 
+                              cursor={{ strokeDasharray: '3 3' }} 
+                              contentStyle={tooltipStyle}
+                              formatter={(value, name) => [value, name]}
+                            />
+                            
+                            <Scatter name="Metas Financieras" data={data.jtbdOpportunityData} fill="var(--accent-color)">
+                              {data.jtbdOpportunityData.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+                              ))}
+                              <LabelList dataKey="name" position="top" style={{ fontSize: 9, fill: 'var(--text-primary)', fontWeight: 400 }} />
+                            </Scatter>
+                          </ScatterChart>
+                        </ResponsiveContainer>
+                      </div>
+                      
+                      <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: '8px', fontSize: '10px', color: 'var(--text-tertiary)', borderTop: '1px solid var(--border-color)', paddingTop: '10px' }}>
+                        <span>Sup-Derecha: Oportunidades Clave (Alta Importancia / Alta Dificultad)</span>
+                        <span>Inf-Derecha: Básicos (Alta Importancia / Baja Dificultad)</span>
                       </div>
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', overflowY: 'auto', maxHeight: '350px' }}>
-                      {data.jtbdOpportunityData.map((job, idx) => (
-                        <div 
-                          key={job.key} 
-                          title={JTBD_DETAILS[job.name.trim()] || ''}
-                          style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 8px', borderRadius: 'var(--radius-sm)', backgroundColor: idx < 3 ? 'var(--accent-light)' : 'var(--bg-secondary)', border: '1px solid var(--border-color)', cursor: 'help' }}
-                        >
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', maxWidth: '75%' }}>
-                            <span style={{ fontSize: '12px', fontWeight: idx < 3 ? 500 : 400, color: 'var(--text-primary)', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
-                              {idx + 1}. {job.name}
-                            </span>
-                            <span style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>
-                              Imp: {job.importance} | Dif: {job.difficulty}
+
+                    {/* Tabla de Ranking de Oportunidad */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                      <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: 0 }}>
+                        Ranking de metas según dolor observado
+                      </p>
+                      <div className="no-scrollbar" style={{ display: 'flex', flexDirection: 'column', gap: '8px', overflowY: 'auto', maxHeight: '380px' }}>
+                        {data.jtbdOpportunityData.map((job, idx) => (
+                          <div 
+                            key={job.key} 
+                            title={JTBD_DETAILS[job.name.trim()] || ''}
+                            style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 8px', borderRadius: 'var(--radius-sm)', backgroundColor: idx < 3 ? 'var(--accent-light)' : 'var(--bg-secondary)', border: '1px solid var(--border-color)', cursor: 'help' }}
+                          >
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', maxWidth: '75%' }}>
+                              <span style={{ fontSize: '12px', fontWeight: idx < 3 ? 500 : 400, color: 'var(--text-primary)', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+                                {idx + 1}. {job.name}
+                              </span>
+                              <span style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>
+                                Imp: {job.importance} | Dif: {job.difficulty}
+                              </span>
+                            </div>
+                            <span style={{ fontSize: '12px', fontWeight: 600, color: idx < 3 ? 'var(--accent-color)' : 'var(--text-secondary)' }}>
+                              {job.opportunity}
                             </span>
                           </div>
-                          <span style={{ fontSize: '12px', fontWeight: 600, color: idx < 3 ? 'var(--accent-color)' : 'var(--text-secondary)' }}>
-                            {job.opportunity}
-                          </span>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
                     </div>
                   </div>
-
                 </div>
               ) : (
                 <div className="card" style={{ display: 'flex', flexDirection: 'row', gap: '16px', alignItems: 'center', padding: '16px 20px', backgroundColor: 'var(--accent-light)', borderColor: 'var(--accent-color)' }}>
