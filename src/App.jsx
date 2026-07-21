@@ -39,7 +39,49 @@ export default function App() {
     applyTheme(nextTheme);
   };
 
-  // 1. Cargar configuración, caché y tema desde localStorage al iniciar
+  // 1. Función para refrescar datos desde las Google Sheets
+  const triggerRefresh = useCallback(async (activeConfig, background = false) => {
+    if (!activeConfig || !activeConfig.sheets) return;
+    
+    if (!background) {
+      setIsRefreshing(true);
+    }
+    setError(null);
+
+    try {
+      const activeSheets = activeConfig.sheets.filter(s => s.url.trim() !== '');
+      
+      // Consultar todas las hojas en paralelo
+      const fetchedSurveys = await Promise.all(
+        activeSheets.map(async (sheet) => {
+          const rows = await fetchSheetData(sheet.url);
+          return {
+            name: sheet.name,
+            rows: rows
+          };
+        })
+      );
+
+      // Consolidar los resultados de todas las encuestas
+      const consolidated = aggregateSurveyData(fetchedSurveys);
+      
+      // Guardar en cache y actualizar estado
+      localStorage.setItem('survey_cache_data', JSON.stringify(consolidated));
+      localStorage.setItem('survey_cache_timestamp', Date.now().toString());
+
+      setData(consolidated);
+      setLastUpdated(Date.now());
+    } catch (err) {
+      console.error('Error al sincronizar las encuestas:', err);
+      if (!background) {
+        setError(err.message);
+      }
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, []);
+
+  // 2. Cargar configuración, caché y tema desde localStorage al iniciar
   useEffect(() => {
     const savedTheme = localStorage.getItem('survey_theme') || 'system';
     setTheme(savedTheme);
@@ -98,48 +140,6 @@ export default function App() {
       setLastUpdated(null);
     }
   }, [triggerRefresh]);
-
-  // 2. Función para refrescar datos desde las Google Sheets
-  const triggerRefresh = useCallback(async (activeConfig, background = false) => {
-    if (!activeConfig || !activeConfig.sheets) return;
-    
-    if (!background) {
-      setIsRefreshing(true);
-    }
-    setError(null);
-
-    try {
-      const activeSheets = activeConfig.sheets.filter(s => s.url.trim() !== '');
-      
-      // Consultar todas las hojas en paralelo
-      const fetchedSurveys = await Promise.all(
-        activeSheets.map(async (sheet) => {
-          const rows = await fetchSheetData(sheet.url);
-          return {
-            name: sheet.name,
-            rows: rows
-          };
-        })
-      );
-
-      // Consolidar los resultados de todas las encuestas
-      const consolidated = aggregateSurveyData(fetchedSurveys);
-      
-      // Guardar en cache y actualizar estado
-      localStorage.setItem('survey_cache_data', JSON.stringify(consolidated));
-      localStorage.setItem('survey_cache_timestamp', Date.now().toString());
-
-      setData(consolidated);
-      setLastUpdated(Date.now());
-    } catch (err) {
-      console.error('Error al sincronizar las encuestas:', err);
-      if (!background) {
-        setError(err.message);
-      }
-    } finally {
-      setIsRefreshing(false);
-    }
-  }, []);
 
   // 3. Manejo de guardado del panel de configuración
   const handleSaveConfig = (newConfig) => {
