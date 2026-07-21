@@ -83,17 +83,27 @@ export async function fetchSheetData(urlOrId) {
       return [];
     }
 
-    // Obtener los nombres de las columnas (las preguntas de la encuesta)
-    // Usamos label si está definida; si no, el ID de columna (A, B, C...)
-    const headers = table.cols.map((col, idx) => {
-      return col.label ? col.label.trim() : `Columna ${idx + 1}`;
+    // Obtener los nombres de las columnas y hacerlos únicos para evitar que claves duplicadas se sobrescriban
+    const headers = [];
+    const headerCounts = {};
+    table.cols.forEach((col, idx) => {
+      let label = col.label ? col.label.trim() : `Columna ${idx + 1}`;
+      if (!label) label = `Columna ${idx + 1}`;
+
+      if (headerCounts[label] !== undefined) {
+        headerCounts[label]++;
+        headers.push(`${label} __dup__${headerCounts[label]}`);
+      } else {
+        headerCounts[label] = 0;
+        headers.push(label);
+      }
     });
 
     // Parsear las filas
     const rows = table.rows.map(row => {
       const parsedRow = {};
       headers.forEach((header, idx) => {
-        // En algunas filas cortas de gviz, row.c puede ser más corto que los headers
+        // En algunas celdas vacías o filas cortas de gviz, row.c puede ser más corto que los headers
         const cell = row.c && row.c[idx];
         parsedRow[header] = cell ? parseCellValue(cell.v) : null;
       });

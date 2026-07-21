@@ -37,11 +37,27 @@ function normalizeQuestionText(text) {
 }
 
 /**
- * Intenta emparejar una pregunta con un Job de JTBD y una métrica (Importancia o Dificultad)
+ * Resuelve y mapea una columna de encuesta a un Job JTBD de Continuum.
+ * Soporta orden relativo (cuando los nombres se repiten) y búsquedas por palabra clave.
  */
-function matchJTBDQuestion(header) {
-  const text = header.toLowerCase();
+function getJTBDInfo(question, importanceKeys, difficultyKeys) {
+  // A. Coincidencia por orden relativo si son las preguntas estándar repetidas
+  if (question.startsWith('¿Cuán importante es esto para ti?')) {
+    const idx = importanceKeys.indexOf(question);
+    if (idx !== -1 && idx < JTBD_JOBS.length) {
+      return { jobKey: JTBD_JOBS[idx].key, jobLabel: JTBD_JOBS[idx].label, metric: 'importance' };
+    }
+  }
   
+  if (question.startsWith('¿Cuán difícil/fácil te resulta hacerlo hoy en día?')) {
+    const idx = difficultyKeys.indexOf(question);
+    if (idx !== -1 && idx < JTBD_JOBS.length) {
+      return { jobKey: JTBD_JOBS[idx].key, jobLabel: JTBD_JOBS[idx].label, metric: 'difficulty' };
+    }
+  }
+
+  // B. Fallback a coincidencia por palabras clave si no encaja en lo anterior
+  const text = question.toLowerCase();
   let metric = null;
   if (text.includes('dificultad') || text.includes('difícil') || text.includes('dificil')) {
     metric = 'difficulty';
@@ -52,7 +68,7 @@ function matchJTBDQuestion(header) {
   }
   
   for (const job of JTBD_JOBS) {
-    const matchesJob = job.keywords.some(kw => text.includes(kw)) || text.includes(job.key.replace('_', ' '));
+    const matchesJob = job.keywords.some(kw => text.includes(kw)) || text.includes(job.key.replace('_', ' ')) || text.includes(job.label.toLowerCase());
     if (matchesJob) {
       return { jobKey: job.key, jobLabel: job.label, metric };
     }
@@ -91,10 +107,26 @@ export function aggregateSurveyData(surveys) {
     return result;
   }
 
+  // Descubrir orden relativo de columnas JTBD
+  let firstRow = null;
+  for (const s of surveys) {
+    if (s.rows && s.rows.length > 0) {
+      firstRow = s.rows[0];
+      break;
+    }
+  }
+
+  let importanceKeys = [];
+  let difficultyKeys = [];
+  if (firstRow) {
+    const rowKeys = Object.keys(firstRow);
+    importanceKeys = rowKeys.filter(k => k.startsWith('¿Cuán importante es esto para ti?'));
+    difficultyKeys = rowKeys.filter(k => k.startsWith('¿Cuán difícil/fácil te resulta hacerlo hoy en día?'));
+  }
+
   // 2. Mapear todas las preguntas y procesarlas
   const questionMap = new Map();
   // Para agrupar los scores de JTBD a nivel global
-  // Estructura: { [jobKey]: { label, importanceScores: [], difficultyScores: [] } }
   const jtbdScores = {};
   JTBD_JOBS.forEach(j => {
     jtbdScores[j.key] = { label: j.label, importance: [], difficulty: [] };
@@ -105,8 +137,30 @@ export function aggregateSurveyData(surveys) {
     
     survey.rows.forEach(row => {
       Object.keys(row).forEach(question => {
-        const normQ = normalizeQuestionText(question);
-        if (normQ === 'marca temporal' || normQ === 'timestamp' || normQ === 'fecha') {
+        let displayTitle = question.trim();
+        // Quitar la marca de duplicación interna de la visualización
+        if (displayTitle.includes(' __dup__')) {
+          displayTitle = displayTitle.split(' __dup__')[0];
+        }
+
+        // Determinar si es una pregunta JTBD
+        const jtbdInfo = getJTBDInfo(question, importanceKeys, difficultyKeys);
+        if (jtbdInfo) {
+          const metricLabel = jtbdInfo.metric === 'importance' ? 'Importancia' : 'Dificultad';
+          displayTitle = `${metricLabel}: ${jtbdInfo.jobLabel}`;
+        }
+
+        const normQ = normalizeQuestionText(displayTitle);
+        // Excluir metadatos de marcas temporales y de identificación personal directa en las preguntas agregadas
+        if (
+          normQ === 'marca temporal' || 
+          normQ === 'timestamp' || 
+          normQ === 'fecha' || 
+          normQ.includes('nombre') || 
+          normQ.includes('apellidos') || 
+          normQ.includes('email') || 
+          normQ.includes('correo')
+        ) {
           return;
         }
 
@@ -116,7 +170,7 @@ export function aggregateSurveyData(surveys) {
         // --- A. Procesamiento para Pregunta General ---
         if (!questionMap.has(normQ)) {
           questionMap.set(normQ, {
-            originalTitle: question.trim(),
+            originalTitle: displayTitle,
             normalizedTitle: normQ,
             surveys: new Set(),
             allRawResponses: []
@@ -129,11 +183,10 @@ export function aggregateSurveyData(surveys) {
         }
 
         // --- B. Procesamiento de Preguntas JTBD (Importancia / Dificultad) ---
-        const jtbdMatch = matchJTBDQuestion(question);
-        if (jtbdMatch && val !== null && val !== undefined && String(val) !== '') {
+        if (jtbdInfo && val !== null && val !== undefined && String(val) !== '') {
           const parsedScore = parseLikertValue(val);
           if (parsedScore !== null) {
-            jtbdScores[jtbdMatch.jobKey][jtbdMatch.metric].push(parsedScore);
+            jtbdScores[jtbdInfo.jobKey][jtbdInfo.metric].push(parsedScore);
           }
         }
 
@@ -149,16 +202,16 @@ export function aggregateSurveyData(surveys) {
             result.demographics.employment[val] = (result.demographics.employment[val] || 0) + 1;
           }
           // 3. Gestión Financiera (Presupuesto en pareja / colaborativo)
-          else if (lowerQ.includes('gestion') || lowerQ.includes('gestiona') || lowerQ.includes('administra') || lowerQ.includes('pareja') || lowerQ.includes('conjunto') || lowerQ.includes('presupuesto compartido')) {
+          else if (lowerQ.includes('finanzas') || lowerQ.includes('gestion') || lowerQ.includes('gestiona') || lowerQ.includes('administra') || lowerQ.includes('hogar') || lowerQ.includes('pareja') || lowerQ.includes('conjunto')) {
             result.demographics.budget[val] = (result.demographics.budget[val] || 0) + 1;
           }
           // 4. Billeteras digitales preferidas
-          else if (lowerQ.includes('billetera') || lowerQ.includes('aplicación') || lowerQ.includes('utiliza frecuentemente') || lowerQ.includes('cuál de estas')) {
-            // A veces las billeteras vienen separadas por comas si es pregunta de opción múltiple con checkbox
+          else if (lowerQ.includes('aplicaciones') || lowerQ.includes('billetera') || lowerQ.includes('utiliza frecuentemente') || lowerQ.includes('cuál de estas') || lowerQ.includes('aplicaciones financieras')) {
+            // Limpiar emojis o caracteres de lista y separar si es de opción múltiple
             const splitVals = String(val).split(/[,;]/);
             splitVals.forEach(v => {
-              const cleanVal = v.trim();
-              if (cleanVal !== '') {
+              const cleanVal = v.replace(/^[👛\s•-*]+/, '').trim();
+              if (cleanVal !== '' && cleanVal.length < 50) { // evitar textos largos accidentales
                 result.demographics.wallets[cleanVal] = (result.demographics.wallets[cleanVal] || 0) + 1;
               }
             });
@@ -189,7 +242,7 @@ export function aggregateSurveyData(surveys) {
       }
     } else {
       const uniqueValues = new Set(nonNull.map(v => String(v).toLowerCase()));
-      if (uniqueValues.size <= 10) {
+      if (uniqueValues.size <= 12) { // Ampliado a 12 para respuestas de demografía
         type = 'choice';
       }
     }
@@ -286,10 +339,9 @@ export function aggregateSurveyData(surveys) {
         avgDif = sum / difScores.length;
       }
 
-      // Detectar la escala. Si el valor máximo es menor o igual a 5, escalamos los promedios a base 10.
+      // Escalar si el máximo es <= 5 (para alinearlo con la escala de 10 puntos)
       const maxImp = impScores.length > 0 ? Math.max(...impScores) : 0;
       const maxDif = difScores.length > 0 ? Math.max(...difScores) : 0;
-      
       const requiresScaling = (maxImp > 0 && maxImp <= 5) || (maxDif > 0 && maxDif <= 5);
       
       if (requiresScaling) {
@@ -300,13 +352,7 @@ export function aggregateSurveyData(surveys) {
       avgImp = parseFloat(avgImp.toFixed(2));
       avgDif = parseFloat(avgDif.toFixed(2));
 
-      // Fórmula clásica de oportunidad de Ulwick/JTBD:
-      // Oportunidad = Importancia + max(Importancia - Satisfacción, 0)
-      // Como medimos dificultad, a mayor dificultad, mayor es la oportunidad no resuelta.
-      // Así que: Oportunidad = Importancia + max(Dificultad - (10 - Importancia), 0) o simplemente:
-      // Oportunidad = (Importancia + Dificultad) / 2 o la tensión directa:
-      // En la metodología de Continuum, las oportunidades están determinadas por los puntajes más altos combinados de importancia y dificultad.
-      // Calculamos la puntuación de Oportunidad combinada:
+      // Puntuación de Oportunidad combinada
       const opportunityScore = parseFloat(((avgImp + avgDif) / 2).toFixed(2));
 
       result.jtbdOpportunityData.push({
