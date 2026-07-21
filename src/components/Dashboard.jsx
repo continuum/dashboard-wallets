@@ -234,7 +234,7 @@ function DemographicsBarList({ title, dataObj, total, limit = null, isWalletList
   if (!dataObj || Object.keys(dataObj).length === 0) {
     return (
       <div className="card" style={{ padding: '16px' }}>
-        <h3 style={{ fontSize: '14px', fontWeight: 500, marginBottom: '8px', color: 'var(--text-secondary)' }}>{title}</h3>
+        <h3 style={{ fontSize: '14px', fontWeight: 700, marginBottom: '8px', color: 'var(--text-primary)' }}>{title}</h3>
         <p style={{ fontSize: '12px', color: 'var(--text-tertiary)', fontStyle: 'italic' }}>Sin datos disponibles.</p>
       </div>
     );
@@ -251,7 +251,7 @@ function DemographicsBarList({ title, dataObj, total, limit = null, isWalletList
 
   return (
     <div className="card" style={{ padding: '16px' }}>
-      <h3 style={{ fontSize: '14px', fontWeight: 500, marginBottom: '12px', color: 'var(--text-secondary)', borderBottom: '1px solid var(--border-color)', paddingBottom: '6px' }}>{title}</h3>
+      <h3 style={{ fontSize: '14px', fontWeight: 700, marginBottom: '12px', color: 'var(--text-primary)', borderBottom: '1px solid var(--border-color)', paddingBottom: '6px' }}>{title}</h3>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
         {items.map(item => {
           const pct = total > 0 ? ((item.count / total) * 100).toFixed(1) : 0;
@@ -539,7 +539,7 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
       {/* Header Info - Stats strip */}
       <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '16px', borderBottom: '1px solid var(--border-color)', paddingBottom: '16px' }}>
         <div>
-          <h1 style={{ fontSize: '22px', fontWeight: 400, display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <h1 style={{ fontSize: '22px', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px' }}>
             <BarChart3 style={{ color: 'var(--accent-color)' }} />
             Estudio Billeteras Digitales 2026
           </h1>
@@ -601,7 +601,7 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
                   style={{ 
                     display: 'flex', 
                     flexDirection: 'column', 
-                    justifyContent: 'center', 
+                    justifyContent: 'flex-start', 
                     padding: '24px 32px', 
                     position: 'relative', 
                     minHeight: '180px',
@@ -732,43 +732,51 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
                         Ranking de metas según dolor observado
                       </p>
                       <div className="no-scrollbar" style={{ display: 'flex', flexDirection: 'column', gap: '8px', overflowY: 'auto', maxHeight: '380px' }}>
-                        {data.jtbdOpportunityData.map((job, idx) => {
+                        {data.jtbdOpportunityData.map((job) => {
                           const meta = JTBD_META[job.key] || { num: '?', color: 'var(--text-secondary)' };
                           return (
                             <div 
                               key={job.key} 
                               title={JTBD_DETAILS[job.name.trim()] || ''}
-                              style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 8px', borderRadius: 'var(--radius-sm)', backgroundColor: idx < 3 ? 'var(--accent-light)' : 'var(--bg-secondary)', border: '1px solid var(--border-color)', cursor: 'help' }}
+                              style={{ 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                justifyContent: 'space-between', 
+                                padding: '8px 10px', 
+                                borderRadius: 'var(--radius-md)', 
+                                backgroundColor: meta.color, 
+                                border: '1px solid rgba(255, 255, 255, 0.15)', 
+                                boxShadow: '0 2px 6px rgba(0, 0, 0, 0.08)',
+                                cursor: 'help'
+                              }}
                             >
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', maxWidth: '80%', minWidth: 0 }}>
-                                <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)', minWidth: '22px' }}>
-                                  {idx + 1}°
-                                </span>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', maxWidth: '85%', minWidth: 0 }}>
                                 <div style={{ 
-                                  width: '18px', 
-                                  height: '18px', 
+                                  width: '20px', 
+                                  height: '20px', 
                                   borderRadius: '50%', 
-                                  backgroundColor: meta.color, 
-                                  color: '#ffffff', 
-                                  fontSize: '10px', 
-                                  fontWeight: 'bold', 
+                                  backgroundColor: '#ffffff', 
+                                  color: meta.color, 
+                                  fontSize: '11px', 
+                                  fontWeight: '800', 
                                   display: 'flex', 
                                   alignItems: 'center', 
                                   justifyContent: 'center',
-                                  flexShrink: 0
+                                  flexShrink: 0,
+                                  boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
                                 }}>
                                   {meta.num}
                                 </div>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', minWidth: 0 }}>
-                                  <span style={{ fontSize: '12px', fontWeight: idx < 3 ? 600 : 500, color: 'var(--text-primary)', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+                                  <span style={{ fontSize: '12px', fontWeight: 700, color: '#ffffff', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
                                     {job.name}
                                   </span>
-                                  <span style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>
+                                  <span style={{ fontSize: '10px', color: 'rgba(255, 255, 255, 0.85)' }}>
                                     Imp: {job.importance} | Dif: {job.difficulty}
                                   </span>
                                 </div>
                               </div>
-                              <span style={{ fontSize: '12px', fontWeight: 600, color: idx < 3 ? 'var(--accent-color)' : 'var(--text-secondary)', marginLeft: '8px' }}>
+                              <span style={{ fontSize: '12px', fontWeight: 700, color: '#ffffff', marginLeft: '8px' }}>
                                 {job.opportunity}
                               </span>
                             </div>
