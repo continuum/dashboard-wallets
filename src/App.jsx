@@ -18,6 +18,7 @@ export default function App() {
   const [error, setError] = useState(null);
   const [showConfig, setShowConfig] = useState(false);
   const [theme, setTheme] = useState('system'); // 'system', 'light', 'dark'
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   // Estados para proteger Ajustes y Restablecer
   const [isUnlocked, setIsUnlocked] = useState(false);
@@ -243,8 +244,16 @@ export default function App() {
     return () => clearInterval(checkInterval);
   }, [config, lastUpdated, triggerRefresh, isRefreshing]);
 
+  // Hook para cerrar el dropdown al hacer clic fuera
+  useEffect(() => {
+    if (!dropdownOpen) return;
+    const handleOutsideClick = () => setDropdownOpen(false);
+    window.addEventListener('click', handleOutsideClick);
+    return () => window.removeEventListener('click', handleOutsideClick);
+  }, [dropdownOpen]);
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', position: 'relative', overflowX: 'hidden' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', position: 'relative', overflowX: 'hidden', backgroundColor: 'transparent' }}>
       
       {/* Fondo difuminado de círculos de color (estilo ContinuumHQ) */}
       <div className="blurry-bg-container">
@@ -269,35 +278,115 @@ export default function App() {
             }} 
           />
         </div>
-        <div className="header-actions">
+        <div className="header-actions" style={{ position: 'relative' }}>
+          {/* Único botón de engranaje sin etiqueta */}
           <button 
             className="btn btn-secondary btn-icon"
-            onClick={cycleTheme}
-            title={`Tema: ${theme === 'system' ? 'Sistema' : theme === 'light' ? 'Claro' : 'Oscuro'}`}
-            style={{ width: '36px', height: '36px', borderRadius: '50%' }}
+            onClick={(e) => { e.stopPropagation(); setDropdownOpen(!dropdownOpen); }}
+            title="Opciones"
+            style={{ width: '36px', height: '36px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
           >
-            {theme === 'system' && <Computer size={16} />}
-            {theme === 'light' && <SunLight size={16} />}
-            {theme === 'dark' && <HalfMoon size={16} />}
+            <Settings size={18} />
           </button>
           
-          <button 
-            className="btn btn-secondary"
-            onClick={handleSettingsClick}
-            style={{ height: '36px', padding: '0 12px' }}
-          >
-            <Settings size={16} />
-            {config ? 'Ajustes' : 'Configurar'}
-          </button>
-          
-          {config && (
-            <button 
-              className="btn btn-danger"
-              onClick={handleResetConfig}
-              style={{ height: '36px', padding: '0 12px' }}
+          {/* Dropdown de opciones */}
+          {dropdownOpen && (
+            <div 
+              style={{
+                position: 'absolute',
+                top: '42px',
+                right: 0,
+                backgroundColor: 'var(--card-bg)',
+                border: '1px solid var(--border-color)',
+                borderRadius: 'var(--radius-md)',
+                boxShadow: 'var(--shadow-md)',
+                zIndex: 100,
+                minWidth: '170px',
+                display: 'flex',
+                flexDirection: 'column',
+                padding: '4px 0',
+                overflow: 'hidden'
+              }}
+              onClick={(e) => e.stopPropagation()}
             >
-              Restablecer
-            </button>
+              {/* Opción 1: Modo / Tema */}
+              <button 
+                className="dropdown-item"
+                onClick={() => { cycleTheme(); }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '10px 14px',
+                  width: '100%',
+                  background: 'none',
+                  border: 'none',
+                  textAlign: 'left',
+                  cursor: 'pointer',
+                  fontSize: '13px',
+                  color: 'var(--text-primary)'
+                }}
+              >
+                {theme === 'system' && <Computer size={14} />}
+                {theme === 'light' && <SunLight size={14} />}
+                {theme === 'dark' && <HalfMoon size={14} />}
+                <span style={{ fontWeight: 500 }}>
+                  Tema: {theme === 'system' ? 'Sistema' : theme === 'light' ? 'Claro' : 'Oscuro'}
+                </span>
+              </button>
+
+              {/* Opción 2: Ajustes */}
+              <button 
+                className="dropdown-item"
+                onClick={() => { handleSettingsClick(); setDropdownOpen(false); }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '10px 14px',
+                  width: '100%',
+                  background: 'none',
+                  border: 'none',
+                  textAlign: 'left',
+                  cursor: 'pointer',
+                  fontSize: '13px',
+                  color: 'var(--text-primary)',
+                  borderTop: '1px solid var(--border-color)'
+                }}
+              >
+                <Settings size={14} />
+                <span style={{ fontWeight: 500 }}>
+                  {config ? 'Ajustes' : 'Configurar'}
+                </span>
+              </button>
+
+              {/* Opción 3: Restablecer */}
+              {config && (
+                <button 
+                  className="dropdown-item"
+                  onClick={() => { handleResetConfig(); setDropdownOpen(false); }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '10px 14px',
+                    width: '100%',
+                    background: 'none',
+                    border: 'none',
+                    textAlign: 'left',
+                    cursor: 'pointer',
+                    fontSize: '13px',
+                    color: 'var(--danger-color)',
+                    borderTop: '1px solid var(--border-color)'
+                  }}
+                >
+                  <WarningTriangle size={14} />
+                  <span style={{ fontWeight: 500 }}>
+                    Restablecer
+                  </span>
+                </button>
+              )}
+            </div>
           )}
         </div>
       </header>

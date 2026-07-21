@@ -31,7 +31,7 @@
   --shadow-sm: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15);
   --shadow-md: 0 1px 3px 0 rgba(60,64,67,0.3), 0 4px 8px 3px rgba(60,64,67,0.15);
   
-  background-color: var(--bg-primary);
+  background-color: transparent;
   color: var(--text-primary);
   font-family: var(--font-family);
   font-size: 14px;
@@ -105,7 +105,7 @@
 }
 
 body {
-  background-color: var(--bg-primary);
+  background-color: transparent;
   color: var(--text-primary);
   min-height: 100vh;
 }
@@ -667,4 +667,10 @@ p {
   color: var(--text-primary) !important;
   transform: scale(1.05);
 }
+
+/* Dropdown items hover style */
+.dropdown-item:hover {
+  background-color: var(--bg-secondary) !important;
+}
+
 

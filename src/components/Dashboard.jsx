@@ -16,6 +16,11 @@ import logoCopec from '../assets/copec.png';
 import logoGoogleWallet from '../assets/google-wallet.png';
 import logoMiBanco from '../assets/mi-banco.png';
 
+import imgContinuumBg from '../assets/continuum-bg.png';
+import imgContinuumLogo from '../assets/continuum-logo.png';
+import imgChocaleLogo from '../assets/chocale-logo.png';
+import imgChilepayLogo from '../assets/chilepay-logo.jpg';
+
 const COLORS_LIGHT = ['#1a73e8', '#12b5cb', '#ab47bc', '#34a853', '#fbbc05', '#e91e63', '#ff5722', '#607d8b'];
 const COLORS_DARK = ['#8ab4f8', '#78d9ec', '#c58af9', '#81c995', '#fdd663', '#f48fb1', '#ffab91', '#b0bec5'];
 
@@ -735,6 +740,41 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
                       if (lower.includes('chilepay') || lower.includes('chile pay')) return 'Respuestas ChilePay';
                       return `Respuestas ${name}`;
                     };
+
+                    const lower = survey.name.toLowerCase();
+                    let cardBgStyle = {};
+                    let logoImg = null;
+                    let textPrimaryColor = 'var(--text-primary)';
+                    let textSecondaryColor = 'var(--text-secondary)';
+                    
+                    if (lower.includes('continuum')) {
+                      cardBgStyle = {
+                        backgroundImage: `url(${imgContinuumBg})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        border: 'none'
+                      };
+                      logoImg = imgContinuumLogo;
+                      textPrimaryColor = '#ffffff';
+                      textSecondaryColor = 'rgba(255, 255, 255, 0.7)';
+                    } else if (lower.includes('chócale') || lower.includes('chocale')) {
+                      cardBgStyle = {
+                        backgroundColor: '#1f2229', // Color oscuro de su logo
+                        border: 'none'
+                      };
+                      logoImg = imgChocaleLogo;
+                      textPrimaryColor = '#ffffff';
+                      textSecondaryColor = 'rgba(255, 255, 255, 0.7)';
+                    } else if (lower.includes('chilepay') || lower.includes('chile pay')) {
+                      cardBgStyle = {
+                        backgroundColor: '#7e378c', // Morado principal
+                        border: 'none'
+                      };
+                      logoImg = imgChilepayLogo;
+                      textPrimaryColor = '#ffffff';
+                      textSecondaryColor = 'rgba(255, 255, 255, 0.7)';
+                    }
+
                     return (
                       <div 
                         className="card interactive-card" 
@@ -748,25 +788,34 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
                           minHeight: '52px', 
                           margin: 0, 
                           position: 'relative',
-                          cursor: 'pointer'
+                          cursor: 'pointer',
+                          ...cardBgStyle
                         }}
                         title={`Haz clic para ver el desglose detallado filtrado por ${survey.name}`}
                       >
-                        <span style={{ fontSize: '11px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 500 }}>
+                        <span style={{ fontSize: '11px', color: textSecondaryColor, textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>
                           {getSurveyLabel(survey.name)}
                         </span>
-                        <span style={{ fontSize: '20px', fontWeight: 600, color: 'var(--text-primary)', marginTop: '4px' }}>
+                        <span style={{ fontSize: '20px', fontWeight: 800, color: textPrimaryColor, marginTop: '4px' }}>
                           {survey.rows.length}
                         </span>
-                        <div style={{
-                          position: 'absolute',
-                          left: 0,
-                          top: 0,
-                          bottom: 0,
-                          width: '4px',
-                          backgroundColor: survey.name.toLowerCase().includes('continuum') ? '#00d2ff' : survey.name.toLowerCase().includes('chócale') || survey.name.toLowerCase().includes('chocale') ? '#f25c05' : '#002855',
-                          borderRadius: '4px 0 0 4px'
-                        }} />
+                        {logoImg && (
+                          <img 
+                            src={logoImg} 
+                            alt={survey.name} 
+                            style={{ 
+                              position: 'absolute', 
+                              right: '16px', 
+                              top: '50%', 
+                              transform: 'translateY(-50%)', 
+                              height: '24px', 
+                              maxWidth: '64px',
+                              objectFit: 'contain',
+                              borderRadius: '4px',
+                              opacity: 0.95
+                            }} 
+                          />
+                        )}
                       </div>
                     );
                   })}
