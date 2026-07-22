@@ -619,21 +619,35 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
                   {selectedSource === 'consolidated' ? (
                     <>
                       <Legend wrapperStyle={{ fontSize: 9, paddingTop: 4 }} />
-                      {q.involvedSurveys.map((surveyName, sIdx) => (
-                        <Bar 
-                          key={surveyName} 
-                          dataKey={surveyName} 
-                          name={surveyName.replace('Encuesta ', '')}
-                          stackId="stack" 
-                          fill={colors[data.rawSurveys.findIndex(s => s.name === surveyName) % colors.length]} 
-                        />
-                      ))}
+                      {q.involvedSurveys.map((surveyName) => {
+                        const lower = surveyName.toLowerCase();
+                        let surveyColor = '#3b82f6';
+                        if (lower.includes('continuum')) surveyColor = '#042cb0';
+                        else if (lower.includes('chócale') || lower.includes('chocale')) surveyColor = '#f25c05';
+                        else if (lower.includes('chilepay') || lower.includes('chile pay')) surveyColor = '#7e378c';
+                        
+                        return (
+                          <Bar 
+                            key={surveyName} 
+                            dataKey={surveyName} 
+                            name={surveyName.replace('Encuesta ', '')}
+                            stackId="stack" 
+                            fill={surveyColor} 
+                          />
+                        );
+                      })}
                     </>
                   ) : (
                     <Bar 
                       dataKey="cantidad" 
                       name="Respuestas" 
-                      fill={colors[data.rawSurveys.findIndex(s => s.name === selectedSource) % colors.length]} 
+                      fill={(() => {
+                        const lower = selectedSource.toLowerCase();
+                        if (lower.includes('continuum')) return '#042cb0';
+                        if (lower.includes('chócale') || lower.includes('chocale')) return '#f25c05';
+                        if (lower.includes('chilepay') || lower.includes('chile pay')) return '#7e378c';
+                        return '#3b82f6';
+                      })()} 
                       radius={[4, 4, 0, 0]}
                       barSize={24}
                     />
@@ -1064,7 +1078,6 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
           {/* TAB 2: DESGLOSE DE PREGUNTAS (CON FILTRO DE ORIGEN HÍBRIDO) */}
           {activeTab === 'breakdown' && (() => {
             const jtbdPairs = [];
-            const otherQuestions = [];
             const jobNamesOrder = [
               'Universalidad',
               'Seguridad',
@@ -1090,15 +1103,6 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
                 });
               }
             });
-            
-            filteredQuestions.forEach(q => {
-              const isJtbd = jobNamesOrder.some(job => 
-                q.title === `Importancia: ${job}` || q.title === `Dificultad: ${job}`
-              );
-              if (!isJtbd) {
-                otherQuestions.push(q);
-              }
-            });
 
             return (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
@@ -1120,8 +1124,8 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
                 </div>
 
                 {/* Listado de Preguntas Filtradas en Filas de Jobs */}
-                {filteredQuestions.length === 0 ? (
-                  <p style={{ fontSize: '14px', color: 'var(--text-secondary)', fontStyle: 'italic', textAlign: 'center', padding: '32px' }}>Sin preguntas cargadas para esta selección.</p>
+                {jtbdPairs.length === 0 ? (
+                  <p style={{ fontSize: '14px', color: 'var(--text-secondary)', fontStyle: 'italic', textAlign: 'center', padding: '32px' }}>Sin datos de Jobs cargados para esta selección.</p>
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
                     {/* Renderizar los 10 pares de JTBD */}
@@ -1167,16 +1171,6 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
                             )}
                           </div>
                         </div>
-                      </div>
-                    ))}
-
-                    {/* Renderizar otras preguntas que no son JTBD (como comentarios finales) */}
-                    {otherQuestions.map((q, idx) => (
-                      <div key={`other-${idx}`} className="card" style={{ padding: '20px' }}>
-                        <h3 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)', borderBottom: '1px solid var(--border-color)', paddingBottom: '10px', marginBottom: '16px' }}>
-                          {q.title}
-                        </h3>
-                        {renderQuestionChart(q, `other-${idx}`)}
                       </div>
                     ))}
                   </div>
