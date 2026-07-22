@@ -182,7 +182,6 @@ p {
 
 /* Header style - flat, thin border */
 .app-header {
-  border-bottom: 1px solid var(--border-color);
   padding: 16px 24px;
   background-color: var(--header-bg, var(--bg-primary));
   backdrop-filter: blur(12px);
