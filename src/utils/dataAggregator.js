@@ -58,11 +58,11 @@ function cleanWalletName(val) {
   if (lower.includes('copec')) {
     return 'Copec Pay';
   }
-  if (lower.includes('mi banco') || lower.includes('aplicación de mi banco') || lower.includes('aplicacion de mi banco')) {
-    return 'La aplicación de mi banco';
+  if (lower.includes('mi banco') || lower.includes('aplicación de mi banco') || lower.includes('aplicacion de mi banco') || lower.includes('app banco')) {
+    return 'App banco';
   }
   if (lower.includes('rutpay') || lower.includes('cuenta rut') || lower.includes('banco estado') || lower.includes('bancoestado')) {
-    return 'RutPay (Banco Estado)';
+    return 'RutPay';
   }
   if (lower.includes('cencopay') || lower.includes('cenco pay')) {
     return 'Cencopay';

@@ -160,7 +160,7 @@ function PreferredWalletsCard({ dataObj, total }) {
       displayName = 'MACH';
     } else if (lower.includes('rutpay') || lower.includes('rut pay') || lower.includes('bancoestado') || lower.includes('banco estado') || lower.includes('cuenta rut')) {
       logo = logoRutPay;
-      displayName = 'RutPay (Banco Estado)';
+      displayName = 'RutPay';
     } else if (lower.includes('cencopay') || lower.includes('cenco pay')) {
       logo = logoCencopay;
       displayName = 'Cencopay';
@@ -194,9 +194,9 @@ function PreferredWalletsCard({ dataObj, total }) {
     } else if (lower.includes('google') && lower.includes('pay')) {
       logo = logoGoogleWallet;
       displayName = 'Google Pay';
-    } else if (lower.includes('mi banco') || lower.includes('aplicación de mi banco') || lower.includes('banco')) {
+    } else if (lower.includes('mi banco') || lower.includes('aplicación de mi banco') || lower.includes('app banco') || lower.includes('banco')) {
       logo = logoMiBanco;
-      displayName = 'La aplicación de mi banco';
+      displayName = 'App banco';
     }
     
     return {
@@ -255,7 +255,7 @@ function PreferredWalletsCard({ dataObj, total }) {
     <div className="card" style={{ padding: '20px', display: 'flex', flexDirection: 'column', width: '100%' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '8px', marginBottom: '16px' }}>
         <h3 style={{ fontSize: '15px', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
-          Billeteras Preferidas (Ranking Completo)
+          Billeteras Preferidas
         </h3>
         <span style={{ fontSize: '11px', color: 'var(--text-tertiary)', fontWeight: 500 }}>
           {items.length} billeteras registradas
