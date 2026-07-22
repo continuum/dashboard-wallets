@@ -709,6 +709,13 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
           Resumen Ejecutivo
         </button>
         <button 
+          className={`tab-btn ${activeTab === 'demographics' ? 'active' : ''}`}
+          onClick={() => setActiveTab('demographics')}
+          disabled={!hasResponses}
+        >
+          Perfil Demográfico
+        </button>
+        <button 
           className={`tab-btn ${activeTab === 'breakdown' ? 'active' : ''}`}
           onClick={() => setActiveTab('breakdown')}
           disabled={!hasResponses}
@@ -982,14 +989,22 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
                 </div>
               )}
 
-              {/* Sección B: Perfil de la Muestra (Consolidado de las 3 encuestas) */}
+            </div>
+          )}
+
+          {/* TAB 2: PERFIL DEMOGRÁFICO DE LA MUESTRA */}
+          {activeTab === 'demographics' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
               <div>
-                <h2 style={{ fontSize: '16px', fontWeight: 500, marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)' }}>
-                  <StatsReport size={18} />
+                <h2 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)' }}>
+                  <StatsReport size={20} style={{ color: 'var(--accent-color)' }} />
                   Perfil Consolidado de la Muestra (Encuestados 2026)
                 </h2>
+                <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: 0, marginBottom: '20px' }}>
+                  Distribución demográfica y preferencia de billeteras digitales de la muestra acumulada ({data.totalResponses} respuestas totales).
+                </p>
                 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
                   <PreferredWalletsCard 
                     dataObj={data.demographics.wallets} 
                     total={data.totalResponses} 
@@ -1018,7 +1033,6 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
                   />
                 </div>
               </div>
-
             </div>
           )}
 
