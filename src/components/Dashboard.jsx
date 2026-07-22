@@ -713,7 +713,7 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
           onClick={() => setActiveTab('demographics')}
           disabled={!hasResponses}
         >
-          Perfil Demográfico
+          Dimensión demográfica
         </button>
         <button 
           className={`tab-btn ${activeTab === 'breakdown' ? 'active' : ''}`}
@@ -992,46 +992,54 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
             </div>
           )}
 
-          {/* TAB 2: PERFIL DEMOGRÁFICO DE LA MUESTRA */}
+          {/* TAB 2: DIMENSIÓN DEMOGRÁFICA DE LA MUESTRA */}
           {activeTab === 'demographics' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-              <div>
-                <h2 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)' }}>
-                  <StatsReport size={20} style={{ color: 'var(--accent-color)' }} />
-                  Perfil Consolidado de la Muestra (Encuestados 2026)
-                </h2>
-                <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: 0, marginBottom: '20px' }}>
-                  Distribución demográfica y preferencia de billeteras digitales de la muestra acumulada ({data.totalResponses} respuestas totales).
-                </p>
-                
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
-                  <PreferredWalletsCard 
-                    dataObj={data.demographics.wallets} 
-                    total={data.totalResponses} 
-                    onExpand={() => setExpandedChart({ type: 'wallets', title: 'Billeteras Preferidas', dataObj: data.demographics.wallets })}
-                  />
-                  
-                  <DemographicsPieChart 
-                    title="Género" 
-                    dataObj={data.demographics.gender} 
-                    total={data.totalResponses} 
-                    onExpand={() => setExpandedChart({ type: 'gender', title: 'Género', dataObj: data.demographics.gender })}
-                  />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              <p style={{ fontSize: '14px', color: 'var(--text-secondary)', margin: 0, marginBottom: '8px', fontWeight: 500 }}>
+                Distribución demográfica y preferencia de billeteras digitales de la muestra acumulada ({data.totalResponses} respuestas totales).
+              </p>
 
-                  <DemographicsPieChart 
-                    title="Situación Laboral" 
-                    dataObj={data.demographics.employment} 
-                    total={data.totalResponses} 
-                    onExpand={() => setExpandedChart({ type: 'employment', title: 'Situación Laboral', dataObj: data.demographics.employment })}
-                  />
+              {/* Fila 1: Billeteras Preferidas sola a todo el ancho */}
+              <div style={{ width: '100%' }}>
+                <PreferredWalletsCard 
+                  dataObj={data.demographics.wallets} 
+                  total={data.totalResponses} 
+                  onExpand={() => setExpandedChart({ type: 'wallets', title: 'Billeteras Preferidas', dataObj: data.demographics.wallets })}
+                />
+              </div>
 
-                  <DemographicsPieChart 
-                    title="Gestión de Finanzas" 
-                    dataObj={data.demographics.budget} 
-                    total={data.totalResponses} 
-                    onExpand={() => setExpandedChart({ type: 'budget', title: 'Gestión de Finanzas', dataObj: data.demographics.budget })}
-                  />
-                </div>
+              {/* Fila 2: Rangos de edad (50%) + Distribución de género (50%) */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px' }}>
+                <DemographicsPieChart 
+                  title="Rangos de Edad" 
+                  dataObj={data.demographics.age} 
+                  total={data.totalResponses} 
+                  onExpand={() => setExpandedChart({ type: 'age', title: 'Rangos de Edad', dataObj: data.demographics.age })}
+                />
+
+                <DemographicsPieChart 
+                  title="Distribución de Género" 
+                  dataObj={data.demographics.gender} 
+                  total={data.totalResponses} 
+                  onExpand={() => setExpandedChart({ type: 'gender', title: 'Distribución de Género', dataObj: data.demographics.gender })}
+                />
+              </div>
+
+              {/* Fila 3: Situación laboral (50%) + Gestión de finanzas (50%) */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px' }}>
+                <DemographicsPieChart 
+                  title="Situación Laboral" 
+                  dataObj={data.demographics.employment} 
+                  total={data.totalResponses} 
+                  onExpand={() => setExpandedChart({ type: 'employment', title: 'Situación Laboral', dataObj: data.demographics.employment })}
+                />
+
+                <DemographicsPieChart 
+                  title="Gestión de Finanzas" 
+                  dataObj={data.demographics.budget} 
+                  total={data.totalResponses} 
+                  onExpand={() => setExpandedChart({ type: 'budget', title: 'Gestión de Finanzas', dataObj: data.demographics.budget })}
+                />
               </div>
             </div>
           )}
