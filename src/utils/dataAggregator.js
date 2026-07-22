@@ -62,16 +62,28 @@ function cleanWalletName(val) {
     return 'La aplicación de mi banco';
   }
   if (lower.includes('rutpay') || lower.includes('cuenta rut') || lower.includes('banco estado') || lower.includes('bancoestado')) {
-    return 'BancoEstado';
+    return 'RutPay (Banco Estado)';
   }
   if (lower.includes('cencopay') || lower.includes('cenco pay')) {
-    return 'CencoPay';
+    return 'Cencopay';
   }
   if (lower.includes('global') && lower.includes('66')) {
-    return 'Global 66';
+    return 'Global66';
   }
   if (lower.includes('tapp')) {
     return 'Tapp';
+  }
+  if (lower.includes('metromuv') || lower.includes('metro muv')) {
+    return 'MetroMuv';
+  }
+  if (lower.includes('heroes') || lower.includes('héroes') || lower.includes('los heroes')) {
+    return 'Los Héroes';
+  }
+  if (lower.includes('dale')) {
+    return 'Dale';
+  }
+  if (lower.includes('prex')) {
+    return 'Prex';
   }
   
   return name;

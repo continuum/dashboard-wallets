@@ -14,6 +14,17 @@ import logoAppleWallet from '../assets/apple-wallet.png';
 import logoCopec from '../assets/copec.png';
 import logoGoogleWallet from '../assets/google-wallet.png';
 import logoMiBanco from '../assets/mi-banco.png';
+import logoTenpo from '../assets/tenpo.webp';
+import logoOnePay from '../assets/onepay.jpg';
+import logoMACH from '../assets/mach.png';
+import logoRutPay from '../assets/rutpay.png';
+import logoCencopay from '../assets/cencopay.png';
+import logoGlobal66 from '../assets/global66.png';
+import logoTapp from '../assets/tapp.svg';
+import logoMetromuv from '../assets/metromuv.png';
+import logoLosHeroes from '../assets/los_heroes.png';
+import logoDale from '../assets/dale.png';
+import logoPrex from '../assets/prex.png';
 
 
 const COLORS_LIGHT = ['#1a73e8', '#12b5cb', '#ab47bc', '#34a853', '#fbbc05', '#e91e63', '#ff5722', '#607d8b'];
@@ -138,13 +149,54 @@ function PreferredWalletsCard({ dataObj, total }) {
     let displayName = item.name;
     
     const lower = item.name.toLowerCase();
-    if (lower.includes('mercado') && lower.includes('pago')) logo = logoMercadoPago;
-    else if (lower.includes('apple') && lower.includes('pay')) logo = logoAppleWallet;
-    else if (lower.includes('copec')) logo = logoCopec;
-    else if (lower.includes('google') && lower.includes('pay')) logo = logoGoogleWallet;
-    else if (lower.includes('mi banco') || lower.includes('aplicación de mi banco')) {
+    if (lower.includes('tenpo')) {
+      logo = logoTenpo;
+      displayName = 'Tenpo';
+    } else if (lower.includes('onepay') || lower.includes('one pay')) {
+      logo = logoOnePay;
+      displayName = 'OnePay';
+    } else if (lower.includes('mach')) {
+      logo = logoMACH;
+      displayName = 'MACH';
+    } else if (lower.includes('rutpay') || lower.includes('rut pay') || lower.includes('bancoestado') || lower.includes('banco estado') || lower.includes('cuenta rut')) {
+      logo = logoRutPay;
+      displayName = 'RutPay (Banco Estado)';
+    } else if (lower.includes('cencopay') || lower.includes('cenco pay')) {
+      logo = logoCencopay;
+      displayName = 'Cencopay';
+    } else if (lower.includes('global66') || lower.includes('global 66')) {
+      logo = logoGlobal66;
+      displayName = 'Global66';
+    } else if (lower.includes('tapp')) {
+      logo = logoTapp;
+      displayName = 'Tapp';
+    } else if (lower.includes('metromuv') || lower.includes('metro muv')) {
+      logo = logoMetromuv;
+      displayName = 'MetroMuv';
+    } else if (lower.includes('heroes') || lower.includes('héroes') || lower.includes('los heroes')) {
+      logo = logoLosHeroes;
+      displayName = 'Los Héroes';
+    } else if (lower.includes('dale')) {
+      logo = logoDale;
+      displayName = 'Dale';
+    } else if (lower.includes('prex')) {
+      logo = logoPrex;
+      displayName = 'Prex';
+    } else if (lower.includes('mercado') && lower.includes('pago')) {
+      logo = logoMercadoPago;
+      displayName = 'Mercado Pago';
+    } else if (lower.includes('apple') && lower.includes('pay')) {
+      logo = logoAppleWallet;
+      displayName = 'Apple Pay';
+    } else if (lower.includes('copec')) {
+      logo = logoCopec;
+      displayName = 'Copec Pay';
+    } else if (lower.includes('google') && lower.includes('pay')) {
+      logo = logoGoogleWallet;
+      displayName = 'Google Pay';
+    } else if (lower.includes('mi banco') || lower.includes('aplicación de mi banco') || lower.includes('banco')) {
       logo = logoMiBanco;
-      displayName = 'Mi Banco';
+      displayName = 'La aplicación de mi banco';
     }
     
     return {
@@ -227,6 +279,7 @@ function PreferredWalletsCard({ dataObj, total }) {
               width={125}
             />
             <Tooltip 
+              cursor={false}
               formatter={(value, name, props) => [`${value}% (${props.payload.count} menciones)`, 'Preferencia']}
               contentStyle={{
                 backgroundColor: 'var(--card-bg)',
@@ -242,6 +295,7 @@ function PreferredWalletsCard({ dataObj, total }) {
               fill="var(--accent-color)" 
               radius={[0, 6, 6, 0]}
               barSize={24}
+              activeBar={false}
             >
               <LabelList 
                 dataKey="percentage" 
