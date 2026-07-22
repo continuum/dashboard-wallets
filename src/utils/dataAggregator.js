@@ -30,7 +30,7 @@ function parseLikertValue(val) {
 function cleanWalletName(val) {
   if (!val) return '';
   // 1. Quitar emojis y símbolos iniciales (incluyendo los bytes de caracteres de reemplazo)
-  let name = val.replace(/^[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ🏦]+/, '').trim();
+  let name = val.replace(/^[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ🏦]+/u, '').trim();
   
   // 2. Normalizar nombres de billeteras
   const lower = name.toLowerCase();

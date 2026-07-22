@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Settings, HelpCircle, FloppyDisk, Page } from 'iconoir-react';
+import { Settings, HelpCircle, FloppyDisk } from 'iconoir-react';
 import { extractSpreadsheetId } from '../utils/sheetFetcher';
 
 export default function ConfigPanel({ currentConfig, onSave, onCancel, showCancel }) {

@@ -159,9 +159,10 @@ function PreferredWalletsCard({ dataObj, total, isExpanded = false, onExpand = n
 
   const renderCustomXAxisTick = (props) => {
     const { x, y, payload } = props;
+    if (!payload || !payload.value) return null;
     const item = items.find(i => i.name === payload.value);
     if (item && item.logo) {
-      const safeId = payload.value.replace(/[^a-zA-Z0-9]/g, '-');
+      const safeId = `${payload.value.replace(/[^a-zA-Z0-9]/g, '-')}${isExpanded ? '-expanded' : ''}`;
       return (
         <g transform={`translate(${x - 14},${y})`}>
           <defs>
@@ -220,7 +221,7 @@ function PreferredWalletsCard({ dataObj, total, isExpanded = false, onExpand = n
           </button>
         )}
       </div>
-      <div style={{ flex: 1, minHeight: isExpanded ? '340px' : '180px', width: '100%', marginTop: '10px' }}>
+      <div style={{ flex: 1, height: isExpanded ? '340px' : '180px', minHeight: isExpanded ? '340px' : '180px', width: '100%', marginTop: '10px' }}>
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={items} margin={{ top: 20, right: 10, bottom: isExpanded ? 50 : 40, left: 10 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-color)" opacity={0.3} />

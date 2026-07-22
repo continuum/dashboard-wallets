@@ -134,7 +134,7 @@ export default function App() {
             localStorage.removeItem('survey_cache_timestamp');
             triggerRefresh(activeConfig, false);
           }
-        } catch (e) {
+        } catch (_e) {
           localStorage.removeItem('survey_cache_data');
           localStorage.removeItem('survey_cache_timestamp');
           triggerRefresh(activeConfig, false);
