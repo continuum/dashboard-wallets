@@ -117,8 +117,8 @@ export default function App() {
           const parsedData = JSON.parse(cachedDataStr);
           const timestamp = Number(cachedTimestampStr);
 
-          // Validar que el caché tenga la estructura esperada de la nueva versión
-          if (parsedData && Array.isArray(parsedData.rawSurveys) && Array.isArray(parsedData.jtbdOpportunityData)) {
+          // Validar que el caché tenga la estructura esperada de la nueva versión (incluyendo demografía generacional de edad)
+          if (parsedData && Array.isArray(parsedData.rawSurveys) && Array.isArray(parsedData.jtbdOpportunityData) && parsedData.demographics && parsedData.demographics.age && Object.keys(parsedData.demographics.age).length > 0) {
             setData(parsedData);
             setLastUpdated(timestamp);
 

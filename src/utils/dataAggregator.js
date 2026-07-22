@@ -78,6 +78,38 @@ function cleanWalletName(val) {
 }
 
 /**
+ * Agrupa y normaliza las respuestas de edad según las definiciones generacionales oficiales (Centennials/Gen Z, Millennials, Gen X, Boomers).
+ */
+function cleanGenerationalRange(val) {
+  if (val === null || val === undefined || val === '') return null;
+  const str = String(val).trim();
+  const num = parseInt(str, 10);
+  
+  if (!isNaN(num) && str.match(/^\d+$/)) {
+    if (num <= 24) return 'Centennials / Gen Z (18-24)';
+    if (num <= 40) return 'Millennials (25-40)';
+    if (num <= 56) return 'Gen X (41-56)';
+    return 'Boomers (57+)';
+  }
+
+  const lower = str.toLowerCase();
+  if (lower.includes('centennial') || lower.includes('gen z') || (lower.includes('18') && lower.includes('24'))) {
+    return 'Centennials / Gen Z (18-24)';
+  }
+  if (lower.includes('millennial') || lower.includes('gen y') || lower.includes('25') || lower.includes('30') || lower.includes('34') || lower.includes('35') || lower.includes('40')) {
+    return 'Millennials (25-40)';
+  }
+  if (lower.includes('gen x') || lower.includes('41') || lower.includes('45') || lower.includes('50') || lower.includes('54') || lower.includes('56')) {
+    return 'Gen X (41-56)';
+  }
+  if (lower.includes('boomer') || lower.includes('57') || lower.includes('60') || lower.includes('65') || lower.includes('más') || lower.includes('mas')) {
+    return 'Boomers (57+)';
+  }
+
+  return str;
+}
+
+/**
  * Normaliza los nombres de las preguntas para agruparlas.
  */
 function normalizeQuestionText(text) {
@@ -243,40 +275,7 @@ export function aggregateSurveyData(surveys) {
             jtbdScores[jtbdInfo.jobKey][jtbdInfo.metric].push(parsedScore);
           }
         }
-
-/**
- * Agrupa y normaliza las respuestas de edad según las definiciones generacionales oficiales (Centennials/Gen Z, Millennials, Gen X, Boomers).
- */
-function cleanGenerationalRange(val) {
-  if (val === null || val === undefined || val === '') return null;
-  const str = String(val).trim();
-  const num = parseInt(str, 10);
-  
-  if (!isNaN(num) && str.match(/^\d+$/)) {
-    if (num <= 24) return 'Centennials / Gen Z (18-24)';
-    if (num <= 40) return 'Millennials (25-40)';
-    if (num <= 56) return 'Gen X (41-56)';
-    return 'Boomers (57+)';
-  }
-
-  const lower = str.toLowerCase();
-  if (lower.includes('centennial') || lower.includes('gen z') || lower.includes('18') && lower.includes('24')) {
-    return 'Centennials / Gen Z (18-24)';
-  }
-  if (lower.includes('millennial') || lower.includes('gen y') || lower.includes('25') || lower.includes('30') || lower.includes('34') || lower.includes('35') || lower.includes('40')) {
-    return 'Millennials (25-40)';
-  }
-  if (lower.includes('gen x') || lower.includes('41') || lower.includes('45') || lower.includes('50') || lower.includes('54') || lower.includes('56')) {
-    return 'Gen X (41-56)';
-  }
-  if (lower.includes('boomer') || lower.includes('57') || lower.includes('60') || lower.includes('65') || lower.includes('más') || lower.includes('mas')) {
-    return 'Boomers (57+)';
-  }
-
-  return str;
-}
-
-  // C. Detección de Demografía y Perfil
+        // --- C. Detección de Demografía y Perfil ---
         const lowerQ = question.toLowerCase();
         if (val !== null && val !== undefined && String(val) !== '') {
           // 1. Edad / Generaciones
