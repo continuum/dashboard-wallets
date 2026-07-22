@@ -669,10 +669,10 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
       
       {/* Header Info - Stats strip */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '16px', borderBottom: '1px solid var(--border-color)', paddingBottom: '16px' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '16px', paddingBottom: '16px' }}>
         <div>
           <h1 style={{ fontSize: '22px', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px' }}>
             <IconoirBarChart style={{ color: 'var(--accent-color)' }} />
@@ -730,7 +730,7 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
         <>
           {/* TAB 1: RESUMEN EJECUTIVO (CONSOLIDADO DE LAS 3 ENCUESTAS) */}
           {activeTab === 'summary' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
               
               {/* Stat Cards Grid - Dos columnas (Consolidado Grande Izq / Individuales Der) */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '16px', marginBottom: '8px' }}>
@@ -1062,7 +1062,7 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
             });
 
             return (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
                 
                 {/* Selector de Origen */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', backgroundColor: 'var(--bg-secondary)', padding: '12px 16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>

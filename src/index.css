@@ -30,6 +30,7 @@
   --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   --shadow-sm: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15);
   --shadow-md: 0 1px 3px 0 rgba(60,64,67,0.3), 0 4px 8px 3px rgba(60,64,67,0.15);
+  --card-shadow: 0 2px 25px #00000014;
   
   background-color: transparent;
   color: var(--text-primary);
@@ -67,6 +68,7 @@
   
   --shadow-sm: 0 1px 3px 0 rgba(0,0,0,0.5), 0 1px 2px 0 rgba(0,0,0,0.3);
   --shadow-md: 0 4px 6px 0 rgba(0,0,0,0.5), 0 2px 4px 0 rgba(0,0,0,0.3);
+  --card-shadow: 0 4px 3px #0000002e;
 }
 
 /* Modo oscuro automático por sistema (solo si no se está forzando .theme-light) */
@@ -95,6 +97,7 @@
     
     --shadow-sm: 0 1px 3px 0 rgba(0,0,0,0.5), 0 1px 2px 0 rgba(0,0,0,0.3);
     --shadow-md: 0 4px 6px 0 rgba(0,0,0,0.5), 0 2px 4px 0 rgba(0,0,0,0.3);
+    --card-shadow: 0 4px 3px #0000002e;
   }
 }
 
@@ -177,7 +180,7 @@ p {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 32px;
 }
 
 /* Header style - flat, thin border */
@@ -380,7 +383,8 @@ p {
   background-color: var(--card-bg, var(--bg-primary));
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--border-color);
+  border: 1px solid transparent;
+  box-shadow: var(--card-shadow);
   border-radius: var(--radius-lg);
   padding: 20px;
   display: flex;
@@ -390,14 +394,19 @@ p {
   transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s ease;
 }
 
+.card:hover {
+  box-shadow: 0 4px 12px #3c404324;
+  border: 1px solid #0000000d;
+}
+
 .card.interactive-card {
   transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s ease;
 }
 
 .card.interactive-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(60, 64, 67, 0.1);
-  border-color: var(--accent-color);
+  box-shadow: 0 4px 12px #3c404324;
+  border: 1px solid #0000000d;
 }
 
 .card-header {
