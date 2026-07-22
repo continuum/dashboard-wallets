@@ -512,14 +512,23 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
     if (!timestamp) return 'Nunca';
     const diffMs = Date.now() - timestamp;
     const diffMins = Math.floor(diffMs / 60000);
-    
+
     if (diffMins < 1) return 'Hace unos momentos';
     if (diffMins < 60) return `Hace ${diffMins} min`;
-    
+
     const diffHours = Math.floor(diffMins / 60);
     if (diffHours < 24) return `Hace ${diffHours} hora(s)`;
-    
+
     return new Date(timestamp).toLocaleString();
+  };
+
+  const formatShortDateTime = (timestamp) => {
+    if (!timestamp) return 'Nunca';
+    const date = new Date(timestamp);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const timePart = date.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
+    return `${day}/${month} ${timePart}`;
   };
 
   const hasResponses = data.totalResponses > 0;
@@ -710,19 +719,20 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
       {/* Header Info - Stats strip */}
       <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '16px', paddingBottom: '16px' }}>
         <div>
-          <h1 style={{ fontSize: '22px', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <h1 style={{ fontSize: '22px', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px', whiteSpace: 'nowrap' }}>
             <IconoirBarChart style={{ color: 'var(--accent-color)' }} />
-            Encuesta Billeteras Digitales 2026
+            <span className="hide-mobile-word">Encuesta </span>Billeteras Digitales 2026
           </h1>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <p style={{ fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px', margin: 0, color: 'var(--text-secondary)' }}>
+        <div className="header-actions-group">
+          <p className="header-updated-text" style={{ fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px', margin: 0, color: 'var(--text-secondary)' }}>
             <Calendar size={14} />
-            Última sincronización: {formatLastUpdated(lastUpdated)}
+            <span className="desktop-only-inline">Última sincronización: {formatLastUpdated(lastUpdated)}</span>
+            <span className="mobile-only-inline">Actualizado el {formatShortDateTime(lastUpdated)}</span>
           </p>
-          <button 
-            className="btn btn-secondary btn-sync" 
-            onClick={onForceRefresh} 
+          <button
+            className="btn btn-secondary btn-sync header-sync-btn"
+            onClick={onForceRefresh}
             disabled={isRefreshing}
             style={isDark ? {
               border: '1px solid #ffffff',
@@ -731,7 +741,8 @@ export default function Dashboard({ data, lastUpdated, onForceRefresh, isRefresh
             } : {}}
           >
             <Database size={16} className={isRefreshing ? 'animate-spin' : ''} />
-            {isRefreshing ? 'Actualizando...' : 'Sincronizar ahora'}
+            <span className="desktop-only-inline">{isRefreshing ? 'Actualizando...' : 'Sincronizar ahora'}</span>
+            <span className="mobile-only-inline">{isRefreshing ? 'Actualizando...' : 'Actualizar'}</span>
           </button>
         </div>
       </div>

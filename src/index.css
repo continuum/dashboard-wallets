@@ -692,5 +692,55 @@ p {
   }
 }
 
+/* Responsive text swap helpers (mobile vs desktop) */
+.desktop-only-inline {
+  display: inline;
+}
+
+.mobile-only-inline {
+  display: none;
+}
+
+.header-actions-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+@media (max-width: 640px) {
+  .desktop-only-inline {
+    display: none;
+  }
+
+  .mobile-only-inline {
+    display: inline;
+  }
+
+  .hide-mobile-word {
+    display: none;
+  }
+
+  .btn-sync {
+    padding: 8px 16px;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+  }
+
+  /* Botón junto al título en la fila superior; el texto de actualización pasa a una fila propia, alineado a la derecha bajo el botón */
+  .header-actions-group {
+    display: contents;
+  }
+
+  .header-sync-btn {
+    order: 1;
+  }
+
+  .header-updated-text {
+    order: 2;
+    flex: 1 1 100%;
+    justify-content: flex-end;
+  }
+}
+
 
 
