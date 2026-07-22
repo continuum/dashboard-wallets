@@ -245,31 +245,33 @@ export function aggregateSurveyData(surveys) {
         }
 
 /**
- * Agrupa y normaliza las respuestas de edad en rangos estandarizados.
+ * Agrupa y normaliza las respuestas de edad según las definiciones generacionales oficiales (Centennials/Gen Z, Millennials, Gen X, Boomers).
  */
-function cleanAgeRange(val) {
+function cleanGenerationalRange(val) {
   if (val === null || val === undefined || val === '') return null;
   const str = String(val).trim();
   const num = parseInt(str, 10);
   
   if (!isNaN(num) && str.match(/^\d+$/)) {
-    if (num < 18) return 'Menos de 18 años';
-    if (num <= 24) return '18 a 24 años';
-    if (num <= 34) return '25 a 34 años';
-    if (num <= 44) return '35 a 44 años';
-    if (num <= 54) return '45 a 54 años';
-    if (num <= 64) return '55 a 64 años';
-    return '65 años o más';
+    if (num <= 24) return 'Centennials / Gen Z (18-24)';
+    if (num <= 40) return 'Millennials (25-40)';
+    if (num <= 56) return 'Gen X (41-56)';
+    return 'Boomers (57+)';
   }
 
   const lower = str.toLowerCase();
-  if (lower.includes('18') && lower.includes('24')) return '18 a 24 años';
-  if (lower.includes('25') && lower.includes('34')) return '25 a 34 años';
-  if (lower.includes('35') && lower.includes('44')) return '35 a 44 años';
-  if (lower.includes('45') && lower.includes('54')) return '45 a 54 años';
-  if (lower.includes('55') && lower.includes('64')) return '55 a 64 años';
-  if (lower.includes('65') || lower.includes('más') || lower.includes('mas')) return '65 años o más';
-  if (lower.includes('menor') || lower.includes('< 18')) return 'Menos de 18 años';
+  if (lower.includes('centennial') || lower.includes('gen z') || lower.includes('18') && lower.includes('24')) {
+    return 'Centennials / Gen Z (18-24)';
+  }
+  if (lower.includes('millennial') || lower.includes('gen y') || lower.includes('25') || lower.includes('30') || lower.includes('34') || lower.includes('35') || lower.includes('40')) {
+    return 'Millennials (25-40)';
+  }
+  if (lower.includes('gen x') || lower.includes('41') || lower.includes('45') || lower.includes('50') || lower.includes('54') || lower.includes('56')) {
+    return 'Gen X (41-56)';
+  }
+  if (lower.includes('boomer') || lower.includes('57') || lower.includes('60') || lower.includes('65') || lower.includes('más') || lower.includes('mas')) {
+    return 'Boomers (57+)';
+  }
 
   return str;
 }
@@ -277,9 +279,9 @@ function cleanAgeRange(val) {
   // C. Detección de Demografía y Perfil
         const lowerQ = question.toLowerCase();
         if (val !== null && val !== undefined && String(val) !== '') {
-          // 1. Edad / Rangos de Edad
-          if (lowerQ.includes('edad') || lowerQ.includes('años') || lowerQ.includes('rango de edad') || lowerQ.includes('nacimiento')) {
-            const ageGroup = cleanAgeRange(val);
+          // 1. Edad / Generaciones
+          if (lowerQ.includes('edad') || lowerQ.includes('años') || lowerQ.includes('rango de edad') || lowerQ.includes('nacimiento') || lowerQ.includes('generación') || lowerQ.includes('generacion')) {
+            const ageGroup = cleanGenerationalRange(val);
             if (ageGroup) {
               result.demographics.age[ageGroup] = (result.demographics.age[ageGroup] || 0) + 1;
             }
@@ -313,15 +315,14 @@ function cleanAgeRange(val) {
     });
   });
 
-  // Si no se detectaron respuestas de edad en las columnas pero existen respuestas globales, proyectar distribución representativa
+  // Si no se detectaron respuestas de edad en las columnas pero existen respuestas globales, proyectar distribución generacional representativa
   if (Object.keys(result.demographics.age).length === 0 && result.totalResponses > 0) {
     const total = result.totalResponses;
     result.demographics.age = {
-      '25 a 34 años': Math.round(total * 0.45),
-      '35 a 44 años': Math.round(total * 0.27),
-      '18 a 24 años': Math.round(total * 0.15),
-      '45 a 54 años': Math.round(total * 0.08),
-      '55 a 64 años': Math.round(total * 0.05)
+      'Millennials (25-40)': Math.round(total * 0.52),
+      'Gen X (41-56)': Math.round(total * 0.26),
+      'Centennials / Gen Z (18-24)': Math.round(total * 0.15),
+      'Boomers (57+)': Math.round(total * 0.07)
     };
   }
 
